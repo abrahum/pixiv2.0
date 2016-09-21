@@ -50,6 +50,7 @@ def save(Number, dataids, text, cookies, path,ceiling=4):
             b=b+1
         if b>=ceiling:
             print str(dataids[i])+'is too long'
+            i=i+1
             continue
         else:
             b=0#判断id图片是否过多
