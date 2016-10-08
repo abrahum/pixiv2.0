@@ -26,7 +26,7 @@ def getcookies(pid,password,text):
     if not items:
         print 'postkey is not found'
         exit()
-    postkey=item[0]
+    postkey=items[0]
 
     data=({
      'pixiv_id':str(pid),
