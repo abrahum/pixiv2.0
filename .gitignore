@@ -1,3 +1,9 @@
+# 个人文件
+cookie.txt
+highlikeimg/
+dailyimg/
+img/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

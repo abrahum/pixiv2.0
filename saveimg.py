@@ -49,7 +49,7 @@ def save(Number, dataids, text, cookies, path,ceiling=4):
         for originaltu in originaltus:
             b=b+1
         if b>=ceiling:
-            print str(dataids[i])+'is too long'
+            print str(dataids[i])+' is too long'
             i=i+1
             continue
         else:
