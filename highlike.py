@@ -14,7 +14,7 @@ def getid(keyword,cookies,r18=False,leastpages=100,leastlikes=1000):
         myurl = baseurl + '&p=' + str(i+1)
         html = requests.get(url=myurl,cookies=cookies,headers=headers1).text.encode('utf-8')
         targetlist = re.findall(u'<a href="/bookmark_detail\.php\?illust_id=\d+" class="bookmark-count _ui-tooltip" data-tooltip="[0-9,]+',html)
-        if len(targetlist)==0:
+        if not targetlist:
             print 'Page %d is Empty' % (i+1)
             return dataids
         for j in targetlist:

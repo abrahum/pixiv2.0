@@ -10,16 +10,18 @@ headers1= ({
     'User-Agent': user_agent
 })
 
-def getid():
-	url1 = 'http://www.pixiv.net/ranking.php?mode=daily'#每日排行榜
-	res1 = requests.get(url1,headers=headers1)
+def getid(r18=False):
+    url1 = 'http://www.pixiv.net/ranking.php?mode=daily'
+    if r18:
+        url1 = 'http://www.pixiv.net/ranking.php?mode=daily_r18' #每日排行榜
+    res1 = requests.get(url1,headers=headers1)
 
-	content2 = res1.text.encode('utf-8')
-	pattern2 = re.compile('(?<=data-id=")\S*(?=">)')
-	dataids = re.findall(pattern2, content2)  # 寻找id
-	if not dataids:
-	    print 'getids is error'
-	    exit()
-	    # 判断是否成功
-	print 'getids is Success'
-	return dataids
+    content2 = res1.text.encode('utf-8')
+    pattern2 = re.compile('(?<=data-id=")\S*(?=">)')
+    dataids = re.findall(pattern2, content2)  # 寻找id
+    if not dataids:
+        print 'getids is error'
+        exit()
+        # 判断是否成功
+    print 'getids is Success'
+    return dataids
