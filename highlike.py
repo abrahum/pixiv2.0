@@ -14,6 +14,9 @@ def getid(keyword,cookies,r18=False,leastpages=100,leastlikes=1000):
         myurl = baseurl + '&p=' + str(i+1)
         html = requests.get(url=myurl,cookies=cookies,headers=headers1).text.encode('utf-8')
         targetlist = re.findall(u'<a href="/bookmark_detail\.php\?illust_id=\d+" class="bookmark-count _ui-tooltip" data-tooltip="[0-9,]+',html)
+        if len(targetlist)==0:
+            print 'Page %d is Empty' % (i+1)
+            return dataids
         for j in targetlist:
             id = re.search('id=\d+',j).group()[3:]
             likenumber = int(re.search('"[0-9,]+',j).group()[1:].replace(',',''))
@@ -27,6 +30,7 @@ def R18(url,r18=False) :
         url = url + '&r18=1'
         return url
     else:
+        url = url + '&r18=0'
         return url
 
 def keywordSwicher(keyword):

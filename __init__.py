@@ -14,7 +14,7 @@ password = ''  # 密码
 number = 40  # 下载图片数量
 text = 'cookie.txt'  # cookie位置
 ceiling=4  # 防止下载到漫画，每个id图片上限
-keyword=u'' # 高赞关键字
+keyword=u'akasa' # 高赞关键字
 r18=False # r18
 leastlikes=1000 # 高赞爬虫最少赞数
 leastpages=100 # 高赞页数
@@ -36,8 +36,9 @@ def dailydownload(mkpath=str(time.strftime('%Y-%m-%d', time.localtime(time.time(
     saveimg.mkdir('dailyimg'+'\\'+mkpath)
     mkpath = 'dailyimg'+'\\'+mkpath
     saveimg.save(Number=number,dataids=dataids,text=text,cookies=cookies,path=mkpath)
+    print 'Daily Done'
 
-def HightLinkDownload(keyword=keyword,cookies=cookies,r18=r18,leastpages=leastpages,
+def HighLinkDownload(keyword=keyword,cookies=cookies,r18=r18,leastpages=leastpages,
                     leastlikes=leastlikes,Number=number,text=text,mkpath=str(time.strftime('%Y-%m-%d', time.localtime(time.time())))):
     dataids = highlike.getid(keyword=keyword,cookies=cookies,r18=r18,
                     leastpages=leastpages,leastlikes=leastlikes)
@@ -45,6 +46,7 @@ def HightLinkDownload(keyword=keyword,cookies=cookies,r18=r18,leastpages=leastpa
     saveimg.mkdir('highlikeimg'+'\\'+keyword+str(leastlikes)+'like'+mkpath)
     mkpath = 'highlikeimg'+'\\'+keyword+str(leastlikes)+'like'+mkpath
     saveimg.save(Number=number,dataids=dataids,text=text,cookies=cookies,path=mkpath)
+    print 'HighLike Done'
 
-#dailydownload()
-HightLinkDownload()
+dailydownload()
+#HighLinkDownload()
