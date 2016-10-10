@@ -8,6 +8,7 @@ import cookie
 import saveimg
 import daily
 import highlike
+import painter
 
 pid = ''  # 账号
 password = ''  # 密码
@@ -15,9 +16,10 @@ number = 40  # 下载图片数量
 text = 'cookie.txt'  # cookie位置
 ceiling=4  # 防止下载到漫画，每个id图片上限
 keyword=u'' # 高赞关键字
-r18=False # r18
+r18=False # r18daily暂时无效
 leastlikes=1000 # 高赞爬虫最少赞数
 leastpages=100 # 高赞页数
+id= #画手id
 
 today = time.strftime('%Y-%m-%d', time.localtime(time.time()))  # 获取系统时间
 mkpath = str(today)
@@ -54,5 +56,13 @@ def HighLinkDownload(keyword=keyword,cookies=cookies,r18=r18,leastpages=leastpag
     saveimg.save(Number=number,dataids=dataids,text=text,cookies=cookies,path=mkpath)
     print 'HighLike Done'
 
+def PainterDownload(id=id,cookies=cookies,text=text,Number=number):
+    dataids = painter.getid(id=id,cookies=cookies)
+    saveimg.mkdir('painters')
+    saveimg.mkdir('painters\\'+str(id))
+    mkpath = 'painters\\'+str(id)
+    saveimg.save(Number=number,dataids=dataids,text=text,cookies=cookies,path=mkpath)
+
 #dailydownload()
 #HighLinkDownload()
+#PainterDownload()

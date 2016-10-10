@@ -64,12 +64,15 @@ def save(Number, dataids, text, cookies, path,ceiling=4):
             else:
                     str1 = 'png'  # 判断后缀是jpg还是png
             print dataids[i] +'-'+str(b)+ ' is downloading'
-            pic = requests.get(originaltu, stream=True,
-                                   cookies=cookies, headers=headers1)
             string = 'pixiv' + str(dataids[i]) + '-' + 'p' + str(b) + '.' + str1
-            fp = open(path + '\\' + string, 'wb')
-            fp.write(pic.content)
-            fp.close()  # 保存图片
-            print dataids[i]+'-'+str(b) + 'download is Success'
+            isExists = os.path.exists(path + '\\' + string)
+            if not isExists: 
+                pic = requests.get(originaltu, stream=True,cookies=cookies, headers=headers1)
+                fp = open(path + '\\' + string, 'wb')
+                fp.write(pic.content)
+                fp.close()  # 保存图片
+                print dataids[i]+'-'+str(b) + 'download is Success'
+            else:  # 如果目录存在则不创建，并提示目录已存在
+                print dataids[i]+'-'+str(b) + ' existence'
             b=b+1
         i = i + 1

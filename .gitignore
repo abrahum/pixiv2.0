@@ -4,6 +4,7 @@ highlikeimg/
 dailyimg/
 img/
 .vscode/
+painters/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
