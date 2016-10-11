@@ -12,14 +12,14 @@ import painter
 
 pid = ''  # 账号
 password = ''  # 密码
-number = 40  # 下载图片数量
+number = 0  # 下载图片数量 0表示全部下载
 text = 'cookie.txt'  # cookie位置
 ceiling=4  # 防止下载到漫画，每个id图片上限
 keyword=u'' # 高赞关键字
 r18=False # r18daily暂时无效
-leastlikes=1000 # 高赞爬虫最少赞数
-leastpages=100 # 高赞页数
-id= #画手id
+leastlikes=100 # 高赞爬虫最少赞数
+leastpages=10 # 高赞页数
+id='' #画手id
 
 today = time.strftime('%Y-%m-%d', time.localtime(time.time()))  # 获取系统时间
 mkpath = str(today)
@@ -64,5 +64,5 @@ def PainterDownload(id=id,cookies=cookies,text=text,Number=number):
     saveimg.save(Number=number,dataids=dataids,text=text,cookies=cookies,path=mkpath)
 
 #dailydownload()
-#HighLinkDownload()
+HighLinkDownload()
 #PainterDownload()
