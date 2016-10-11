@@ -28,7 +28,7 @@ def save(Number, dataids, text, cookies, path,ceiling=4):
 
     while i < Number :
         b=0
-        isExists = os.path.exists(path+'\\'+'pixiv'+str(dataids[i])+'-'+'p'+str(b)+'.png') or os.path.exists(path+'\\'+'pixiv'+str(dataids[i])+'-'+'p'+str(b)+'.png')
+        isExists = os.path.exists(path+'\\'+'pixiv'+str(dataids[i])+'-p'+str(b)+'.png') or os.path.exists(path+'\\'+'pixiv'+str(dataids[i])+'-p'+str(b)+'.jpg')
         if isExists:
             print dataids[i]+'-'+str(b) + ' existence'
             i = i + 1
@@ -74,7 +74,7 @@ def save(Number, dataids, text, cookies, path,ceiling=4):
                 fp = open(path + '\\' + string, 'wb')
                 fp.write(pic.content)
                 fp.close()  # 保存图片
-                print dataids[i]+'-'+str(b) + 'download is Success'
+                print dataids[i]+'-'+str(b) + ' download is Success'
                 b=b+1
             i = i + 1
 
@@ -82,10 +82,9 @@ def save(Number, dataids, text, cookies, path,ceiling=4):
         print 'All Download'
         for i in dataids:
             b=0
-            isExists = os.path.exists(path+'\\'+'pixiv'+str(i)+'-'+'p'+str(b)+'.png') or os.path.exists(path+'\\'+'pixiv'+str(i)+'-'+'p'+str(b)+'.png')
+            isExists = os.path.exists(path+'\\'+'pixiv'+str(i)+'-'+'p'+str(b)+'.png') or os.path.exists(path+'\\'+'pixiv'+str(i)+'-'+'p'+str(b)+'.jpg')
             if isExists:
                 print i+'-'+str(b) + ' existence'
-                i = i + 1
             else:
                 dataidurl = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + str(i)
                 res1 = requests.get(url=dataidurl, cookies=cookies,
@@ -126,6 +125,6 @@ def save(Number, dataids, text, cookies, path,ceiling=4):
                     fp = open(path + '\\' + string, 'wb')
                     fp.write(pic.content)
                     fp.close()  # 保存图片
-                    print i+'-'+str(b) + 'download is Success'
+                    print i+'-'+str(b) + ' download is Success'
                     b=b+1
             

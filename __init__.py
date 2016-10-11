@@ -15,7 +15,7 @@ password = ''  # 密码
 number = 0  # 下载图片数量 0表示全部下载
 text = 'cookie.txt'  # cookie位置
 ceiling=4  # 防止下载到漫画，每个id图片上限
-keyword=u'' # 高赞关键字
+keyword=u'Love' # 高赞关键字
 r18=False # r18daily暂时无效
 leastlikes=100 # 高赞爬虫最少赞数
 leastpages=10 # 高赞页数
@@ -63,6 +63,7 @@ def PainterDownload(id=id,cookies=cookies,text=text,Number=number):
     mkpath = 'painters\\'+str(id)
     saveimg.save(Number=number,dataids=dataids,text=text,cookies=cookies,path=mkpath)
 
-#dailydownload()
-HighLinkDownload()
-#PainterDownload()
+if __name__ == "__main__":
+    #dailydownload()
+    HighLinkDownload()
+    #PainterDownload()
