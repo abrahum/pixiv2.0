@@ -20,11 +20,11 @@ def getcookies(pid,password,text):
 
     res1 = s.get(shouUrl, headers=headers1)
 
-    content = res1.text.encode('utf-8')
+    content = res1.text
     pattern = re.compile('(?<=<input type="hidden" name="post_key" value=")\w*(?=">)')
     items = re.findall(pattern,content)
     if not items:
-        print 'postkey is not found'
+        print('postkey is not found')
         exit()
     postkey=items[0]
 
@@ -42,7 +42,7 @@ def getcookies(pid,password,text):
     fp = open(text,'wb')
     fp.write('; '.join(['='.join(item) for item in cookies.items()]))
     fp.close()#保存cookies
-    print 'save cookies is Success'
+    print('save cookies is Success')
 
 
 def loadcookie(text):
@@ -52,7 +52,7 @@ def loadcookie(text):
          name,value=line.strip().split('=',1)
          loadcookies[name]=value
      f.close()
-     print 'load cookies is Success'
+     print('load cookies is Success')
      return loadcookies
 
 

@@ -15,13 +15,13 @@ def getid(id,cookies):
     p = 1
     while not empty:
         myurl = url + '&p=' + str(p)
-        html = requests.get(url=myurl,cookies=cookies,headers=headers1).text.encode('utf-8')
+        html = requests.get(url=myurl,cookies=cookies,headers=headers1).text
         targetlist = re.findall(u'<a href="/member_illust\.php\?mode=medium&amp;illust_id=\d+" class="work  _work ">',html)
         if not targetlist:
-            print 'Page %d is Empty' % (p)
+            print('Page %d is Empty' % (p))
             empty = True
         else:
-            print 'Page %d is Done' % (p)
+            print('Page %d is Done' % (p))
         for j in targetlist:
             imgid = re.search('id=\d+',j).group()[3:]
             dataids.append(imgid)
