@@ -16,7 +16,27 @@ def getid(id,cookies):
     while not empty:
         myurl = url + '&p=' + str(p)
         html = requests.get(url=myurl,cookies=cookies,headers=headers1).text
-        targetlist = re.findall(u'<a href="/member_illust\.php\?mode=medium&amp;illust_id=\d+" class="work  _work ">',html)
+        targetlist = re.findall(u'<a href="/member_illust\.php\?mode=medium&amp;illust_id=\d+"',html)
+        if not targetlist:
+            print('Page %d is Empty' % (p))
+            empty = True
+        else:
+            print('Page %d is Done' % (p))
+        for j in targetlist:
+            imgid = re.search('id=\d+',j).group()[3:]
+            dataids.append(imgid)
+        p = p+1
+    return dataids
+
+def getid2(id,cookies):
+    url = 'http://www.pixiv.net/bookmark.php?id=' + str(id)
+    dataids = []
+    empty = False
+    p = 1
+    while not empty:
+        myurl = url + '&p=' + str(p)
+        html = requests.get(url=myurl,cookies=cookies,headers=headers1).text
+        targetlist = re.findall(u'<a href="/bookmark_detail\.php\?illust_id=\d+"',html)
         if not targetlist:
             print('Page %d is Empty' % (p))
             empty = True

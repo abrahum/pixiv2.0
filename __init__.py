@@ -67,8 +67,8 @@ class pixiv(object):
         self.leastlikes=5000 # 高赞爬虫最少赞数
         self.leastpages=1000 # 高赞页数
         self.startpage=0
-        self.id='11246082' #画手id 
-        self.date='20161202'
+        self.id='497532' #画手id 
+        self.date='20161205'
         self.sdate=self.date
         self.threads=True
         self.dataids = []
@@ -78,19 +78,12 @@ class pixiv(object):
             mkpath=str(time.strftime('%Y-%m-%d', time.localtime(time.time())))
         else:
             mkpath=str(self.sdate[0:4]+'-'+self.sdate[4:6]+'-'+self.sdate[6:])
-        dataids = daily.getid(r18=self.r18,date=self.date)
+        self.dataids = daily.getid(r18=self.r18,date=self.date)
         saveimg.mkdir('dailyimg')# 调用函数
         saveimg.mkdir('dailyimg'+'\\'+mkpath+r18word(self.r18))
         mkpath = 'dailyimg'+'\\'+mkpath+r18word(self.r18)
         if self.threads:
-            threads = []
-            for i in dataids:
-                t = threading.Thread(target=saveimg.save,args=(0,[i,],self.text,self.cookies,mkpath))
-                threads.append(t)
-            for t in threads:
-                t.start()
-            for t in tqdm.tqdm(threads):
-                t.join(180)
+            self.threadsave(mkpath)
         else:
             saveimg.save(Number=self.number,dataids=dataids,text=self.text,cookies=self.cookies,path=mkpath)
         print('Daily Done')
@@ -120,37 +113,32 @@ class pixiv(object):
         saveimg.mkdir('highlikeimg'+'\\'+self.keyword+str(self.leastlikes)+'like'+mkpath+r18word(self.r18))
         mkpath = 'highlikeimg'+'\\'+self.keyword+str(self.leastlikes)+'like'+mkpath+r18word(self.r18)
         if self.threads:
-            threads = []
-            eachsize = len(self.dataids)//19
-            for i in range(19):
-                t = threading.Thread(target=saveimg.save,args=(0,self.dataids[i*eachsize:(i+1)*eachsize],self.text,self.cookies,mkpath))
-                threads.append(t)
-            t = threading.Thread(target=saveimg.save,args=(0,self.dataids[19*eachsize:],self.text,self.cookies,mkpath))
-            for t in threads:
-                t.start()
-            for t in tqdm.tqdm(threads):
-                t.join(180)
+            self.threadsave(mkpath)
         else:
             saveimg.save(Number=self.number,dataids=self.dataids,text=self.text,cookies=self.cookies,path=mkpath)
         print('HighLike Done')
 
     def PainterDownload(self):
-        dataids = painter.getid(id=self.id,cookies=self.cookies)
+        self.dataids = painter.getid(id=self.id,cookies=self.cookies)
         saveimg.mkdir('painters')
         saveimg.mkdir('painters\\'+str(self.id))
         mkpath = 'painters\\'+str(self.id)
         if self.threads:
-            threads = []
-            for i in dataids:
-                t = threading.Thread(target=saveimg.save,args=(0,[i,],self.text,self.cookies,mkpath))
-                threads.append(t)
-            for t in threads:
-                t.start()
-            for t in threads:
-                t.join(180)
+            self.threadsave(mkpath)
         else:
             saveimg.save(Number=self.number,dataids=dataids,text=self.text,cookies=self.cookies,path=mkpath)
         print('Painter Done')
+
+    def PainterBookmarkDownload(self):
+        self.dataids = painter.getid2(id=self.id,cookies=self.cookies)
+        saveimg.mkdir('painters')
+        saveimg.mkdir('painters\\'+str(self.id)+'bookmark')
+        mkpath = 'painters\\'+str(self.id)+'bookmark'
+        if self.threads:
+            self.threadsave(mkpath)
+        else:
+            saveimg.save(Number=self.number,dataids=dataids,text=self.text,cookies=self.cookies,path=mkpath)
+        print('Painter\'s Bookmrak Done')
 
     def highlikegetid(self,startpage=0,leastpages=1000):
         baseurl = R18('http://www.pixiv.net/search.php?word=' + keywordSwicher(self.keyword),self.r18)
@@ -169,11 +157,25 @@ class pixiv(object):
             '''print('Page %d is Done' % (i+1))'''
         return self.dataids
 
+    def threadsave(self,mkpath):
+        threads = []
+        eachsize = len(self.dataids)//19
+        for i in range(19):
+            t = threading.Thread(target=saveimg.save,args=(0,self.dataids[i*eachsize:(i+1)*eachsize],self.text,self.cookies,mkpath))
+            threads.append(t)
+        t = threading.Thread(target=saveimg.save,args=(0,self.dataids[19*eachsize:],self.text,self.cookies,mkpath))
+        threads.append(t)
+        for t in threads:
+            t.start()
+        for t in tqdm.tqdm(threads):
+            t.join(180)
+
 
 if __name__ == "__main__":
     test = pixiv()
     #test.superdailydownlad()
     #test.dailydownload()
-    test.HighLinkDownload()
+    #test.HighLinkDownload()
     #test.PainterDownload()
+    test.PainterBookmarkDownload()
 
