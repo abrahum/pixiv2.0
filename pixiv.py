@@ -11,6 +11,7 @@ import daily
 import painter
 import threading
 import tqdm
+import getopt
 
 today = time.strftime('%Y-%m-%d', time.localtime(time.time()))  # 获取系统时间
 mkpath = str(today)
@@ -62,9 +63,9 @@ class pixiv(object):
         self.text = 'cookie.txt'
         self.cookies = getcookies(self.pid,self.password)  # cookie
         self.ceiling=4  # 防止下载到漫画，每个id图片上限
-        self.keyword=u'eva' # 高赞关键字
+        self.keyword=u'ロリ' # 高赞关键字
         self.r18=False # r18daily暂时无效
-        self.leastlikes=5000 # 高赞爬虫最少赞数
+        self.leastlikes=500 # 高赞爬虫最少赞数
         self.leastpages=1000 # 高赞页数
         self.startpage=0
         self.id='497532' #画手id 
@@ -172,10 +173,43 @@ class pixiv(object):
 
 
 if __name__ == "__main__":
-    test = pixiv()
+    p = pixiv()
     #test.superdailydownlad()
     #test.dailydownload()
     #test.HighLinkDownload()
     #test.PainterDownload()
-    test.PainterBookmarkDownload()
+    #test.PainterBookmarkDownload()
 
+    helpmessage = "\npixiv.py -m <mod> -i <inform>\n\nmod:\n\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    -l <leastlike> \npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid"
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:],"hm:i:l:",["mod=","inform=","leastlike="])
+    except:
+        print(helpmessage)
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print(helpmessage)
+            sys.exit()
+        elif opt in ("-m", "--mod"):
+            mod = arg
+        elif opt in ("-i", "--inform"):
+            inform = arg
+        elif opt in ("-l", "--leastlike"):
+            p.leastlikes = int(arg)
+            
+    if mod == "daily":
+        p.date = inform
+        p.sdate = p.date
+        p.dailydownload()
+    elif mod == "highlike":
+        p.keyword = inform
+        p.HighLinkDownload()
+    elif mod == "painter":
+        p.id = inform
+        p.PainterDownload()
+    elif mod == "bookmark":
+        p.id = inform
+        p.PainterBookmarkDownload()
+    else:
+        print("mod:\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    -l <leastlike> \npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid")
