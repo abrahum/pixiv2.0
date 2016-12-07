@@ -21,15 +21,18 @@ headers1 = ({
     'User-Agent': user_agent
 })
 
-def getcookies(pid,password,text = 'cookie.txt'):
-    filename = text
+def getcookies(pid,password,login=False):
+    filename = 'cookie.txt'
+    if login:
+        cookie.getcookies(pid=pid, password=password,text=filename)
+        cookies = cookie.loadcookie(filename)  # 读取cookie
+        return cookies
     if os.path.exists(filename):
-        cookies = cookie.loadcookie(text)
+        cookies = cookie.loadcookie(filename)
         return cookies
     else:
-        cookie.getcookies(pid=pid, password=password,text=text)
-        cookies = cookie.loadcookie(text)  # 读取cookie
-        return cookies
+        print("load cookie false")
+        sys.exit()
 
 def r18word(key):
     if key:
@@ -61,17 +64,17 @@ class pixiv(object):
         self.password = ''  # 密码
         self.number = 0  # 下载图片数量 0表示全部下载
         self.text = 'cookie.txt'
-        self.cookies = getcookies(self.pid,self.password)  # cookie
+        self.cookies = ''  # cookie
         self.ceiling=4  # 防止下载到漫画，每个id图片上限
-        self.keyword=u'ロリ' # 高赞关键字
+        self.keyword=u'' # 高赞关键字
         self.r18=False # r18daily暂时无效
         self.leastlikes=500 # 高赞爬虫最少赞数
         self.leastpages=1000 # 高赞页数
         self.startpage=0
-        self.id='497532' #画手id 
-        self.date='20161205'
+        self.id='' #画手id 
+        self.date=''
         self.sdate=self.date
-        self.threads=True
+        self.threads=False
         self.dataids = []
 
     def dailydownload(self):
@@ -86,7 +89,7 @@ class pixiv(object):
         if self.threads:
             self.threadsave(mkpath)
         else:
-            saveimg.save(Number=self.number,dataids=dataids,text=self.text,cookies=self.cookies,path=mkpath)
+            saveimg.save(Number=self.number,dataids=self.dataids,text=self.text,cookies=self.cookies,path=mkpath)
         print('Daily Done')
 
     def superdailydownlad(self):
@@ -180,10 +183,12 @@ if __name__ == "__main__":
     #test.PainterDownload()
     #test.PainterBookmarkDownload()
 
-    helpmessage = "\npixiv.py -m <mod> -i <inform>\n\nmod:\n\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    -l <leastlike> \npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid"
+    helpmessage = "\npixiv.py -m <mod> -i <inform>\n         -r <r18>    enable r18(disable for daily mod)\n         -t <thread> enable threads\n\nmod:\nlogin    login to pixiv     -i:pid        -p <password>\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    -l <leastlike> \npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid"
+
+    mod = ""
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:],"hm:i:l:",["mod=","inform=","leastlike="])
+        opts, args = getopt.getopt(sys.argv[1:],"hrtm:i:l:p:",["r18","thread","mod=","inform=","leastlike=","password="])
     except:
         print(helpmessage)
         sys.exit(2)
@@ -197,6 +202,14 @@ if __name__ == "__main__":
             inform = arg
         elif opt in ("-l", "--leastlike"):
             p.leastlikes = int(arg)
+        elif opt in ("-r","--r18"):
+            p.r18 = True
+        elif opt in ("-t","--thread"):
+            p.threads = True
+        elif opt in ("-p","--password"):
+            p.password = arg
+        
+    p.cookies = getcookies(p.pid,p.password)
             
     if mod == "daily":
         p.date = inform
@@ -211,5 +224,10 @@ if __name__ == "__main__":
     elif mod == "bookmark":
         p.id = inform
         p.PainterBookmarkDownload()
+    elif mod == "login":
+        p.pid = inform
+        getcookies(p.pid,p.password,login=True)
     else:
-        print("mod:\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    -l <leastlike> \npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid")
+        print("mod:\nlogin    login to pixiv     -i:pid        -p <password>\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    -l <leastlike> \npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid")
+    
+    sys.exit()

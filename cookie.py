@@ -39,7 +39,7 @@ def getcookies(pid,password,text):
 
     res2 = s.post(url1, data=data)#登录页
     cookies = s.cookies
-    fp = open(text,'wb')
+    fp = open(text,'w')
     fp.write('; '.join(['='.join(item) for item in cookies.items()]))
     fp.close()#保存cookies
     print('save cookies is Success')
