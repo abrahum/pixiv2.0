@@ -1,5 +1,13 @@
 # pixiv2.0
-
-需要在\__init__.py更改信息
-
-错误请删除cookie.txt重新启动
+```
+pixiv.py -m <mod> -i <inform>
+         -r <r18>    enable r18(disable for daily mod)
+         -t <thread> enable threads
+mod:
+login    login to pixiv     -i:pid        -p <password>
+daily    daily download     -i:date
+highlike keyword download   -i:keyword    -l <leastlike> 
+painter  painter download   -i:painterid
+bookmark bookmark download  -i:painterid
+```
+当然啦，r18还是需要你的帐号是支持的······
