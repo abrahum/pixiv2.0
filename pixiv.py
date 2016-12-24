@@ -65,16 +65,16 @@ class pixiv(object):
         self.number = 0  # 下载图片数量 0表示全部下载
         self.text = 'cookie.txt'
         self.cookies = ''  # cookie
-        self.ceiling=4  # 防止下载到漫画，每个id图片上限
-        self.keyword=u'' # 高赞关键字
-        self.r18=False # r18daily暂时无效
-        self.leastlikes=500 # 高赞爬虫最少赞数
-        self.leastpages=1000 # 高赞页数
-        self.startpage=0
-        self.id='' #画手id 
-        self.date=''
-        self.sdate=self.date
-        self.threads=False
+        self.ceiling = 4  # 防止下载到漫画，每个id图片上限
+        self.keyword = '' # 高赞关键字
+        self.r18 = False # r18daily暂时无效
+        self.leastlikes = 500 # 高赞爬虫最少赞数
+        self.leastpages = 1000 # 高赞页数
+        self.startpage = 0
+        self.id = '' #画手id 
+        self.date = ''
+        self.sdate = self.date
+        self.threads = False
         self.dataids = []
 
     def dailydownload(self):
@@ -177,15 +177,21 @@ class pixiv(object):
 
 if __name__ == "__main__":
     p = pixiv()
+    '''
+    p.cookies = getcookies(p.pid,p.password)
+    p.keyword = "艦これ"
+    p.threads = True
+    p.leastlikes = 100
     #test.superdailydownlad()
     #test.dailydownload()
-    #test.HighLinkDownload()
+    p.HighLinkDownload()
     #test.PainterDownload()
     #test.PainterBookmarkDownload()
-
+    '''
     helpmessage = "\npixiv.py -m <mod> -i <inform>\n         -r <r18>    enable r18(disable for daily mod)\n         -t <thread> enable threads\n\nmod:\nlogin    login to pixiv     -i:pid        -p <password>\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    -l <leastlike> \npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid"
 
     mod = ""
+    inform = ""
 
     try:
         opts, args = getopt.getopt(sys.argv[1:],"hrtm:i:l:p:",["r18","thread","mod=","inform=","leastlike=","password="])
@@ -230,4 +236,4 @@ if __name__ == "__main__":
     else:
         print("mod:\nlogin    login to pixiv     -i:pid        -p <password>\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    -l <leastlike> \npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid")
     
-    sys.exit()
+    sys.exit(2)
