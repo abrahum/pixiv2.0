@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 import requests
 import re
@@ -21,24 +21,26 @@ headers1 = ({
     'User-Agent': user_agent
 })
 
-def getcookies(pid,password,login=False):
+
+def getcookies(pid, password, login=False):
     filename = 'cookie.txt'
     if login:
         cookie.getcookies(pid=pid, password=password,text=filename)
         cookies = cookie.loadcookie(filename)  # 读取cookie
         return cookies
-    if os.path.exists(filename):
+    elif os.path.exists(filename):
         cookies = cookie.loadcookie(filename)
         return cookies
     else:
         print("load cookie false")
-        sys.exit()
+
 
 def r18word(key):
     if key:
         return 'r18'
     else:
         return ''  
+
 
 def keywordSwicher(keyword):
     byte = keyword.encode('utf-8')
@@ -49,6 +51,7 @@ def keywordSwicher(keyword):
         result = result + Dbytedir.get(target)
     return result
 
+
 def R18(url,r18=False) :
     if r18:
         url = url + '&r18=1'
@@ -56,6 +59,7 @@ def R18(url,r18=False) :
     else:
         url = url + '&r18=0'
         return url    
+
 
 class pixiv(object):
     
@@ -66,12 +70,12 @@ class pixiv(object):
         self.text = 'cookie.txt'
         self.cookies = ''  # cookie
         self.ceiling = 4  # 防止下载到漫画，每个id图片上限
-        self.keyword = '' # 高赞关键字
-        self.r18 = False # r18daily暂时无效
-        self.leastlikes = 500 # 高赞爬虫最少赞数
-        self.leastpages = 1000 # 高赞页数
+        self.keyword = ''  # 高赞关键字
+        self.r18 = False  # r18daily暂时无效
+        self.leastlikes = 500  # 高赞爬虫最少赞数
+        self.leastpages = 1000  # 高赞页数
         self.startpage = 0
-        self.id = '' #画手id 
+        self.id = ''  # 画手id
         self.date = ''
         self.sdate = self.date
         self.threads = False
@@ -83,7 +87,7 @@ class pixiv(object):
         else:
             mkpath=str(self.sdate[0:4]+'-'+self.sdate[4:6]+'-'+self.sdate[6:])
         self.dataids = daily.getid(r18=self.r18,date=self.date)
-        saveimg.mkdir('dailyimg')# 调用函数
+        saveimg.mkdir('dailyimg')  # 调用函数
         saveimg.mkdir('dailyimg'+'\\'+mkpath+r18word(self.r18))
         mkpath = 'dailyimg'+'\\'+mkpath+r18word(self.r18)
         if self.threads:
@@ -130,7 +134,7 @@ class pixiv(object):
         if self.threads:
             self.threadsave(mkpath)
         else:
-            saveimg.save(Number=self.number,dataids=dataids,text=self.text,cookies=self.cookies,path=mkpath)
+            saveimg.save(Number=self.number,dataids=self.dataids,text=self.text,cookies=self.cookies,path=mkpath)
         print('Painter Done')
 
     def PainterBookmarkDownload(self):
@@ -141,7 +145,7 @@ class pixiv(object):
         if self.threads:
             self.threadsave(mkpath)
         else:
-            saveimg.save(Number=self.number,dataids=dataids,text=self.text,cookies=self.cookies,path=mkpath)
+            saveimg.save(Number=self.number,dataids=self.dataids,text=self.text,cookies=self.cookies,path=mkpath)
         print('Painter\'s Bookmrak Done')
 
     def highlikegetid(self,startpage=0,leastpages=1000):
@@ -177,17 +181,6 @@ class pixiv(object):
 
 if __name__ == "__main__":
     p = pixiv()
-    '''
-    p.cookies = getcookies(p.pid,p.password)
-    p.keyword = "艦これ"
-    p.threads = True
-    p.leastlikes = 100
-    #test.superdailydownlad()
-    #test.dailydownload()
-    p.HighLinkDownload()
-    #test.PainterDownload()
-    #test.PainterBookmarkDownload()
-    '''
     helpmessage = "\npixiv.py -m <mod> -i <inform>\n         -r <r18>    enable r18(disable for daily mod)\n         -t <thread> enable threads\n\nmod:\nlogin    login to pixiv     -i:pid        -p <password>\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    -l <leastlike> \npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid"
 
     mod = ""
@@ -232,7 +225,7 @@ if __name__ == "__main__":
         p.PainterBookmarkDownload()
     elif mod == "login":
         p.pid = inform
-        getcookies(p.pid,p.password,login=True)
+        getcookies(p.pid, p.password, login=True)
     else:
         print("mod:\nlogin    login to pixiv     -i:pid        -p <password>\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    -l <leastlike> \npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid")
     

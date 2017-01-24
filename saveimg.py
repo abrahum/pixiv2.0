@@ -22,7 +22,7 @@ def mkdir(path):
         return False
 
 
-def save(Number, dataids, text, cookies, path,ceiling=8):
+def save(Number, dataids, text, cookies, path,ceiling=4):
     i = 0
     Number=Number
 

@@ -5,6 +5,7 @@ dailyimg/
 img/
 .vscode/
 painters/
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
