@@ -1,8 +1,9 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 import requests
 import re
 import os
-user_agent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'
+user_agent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/\
+537.36'
 headers1 = ({
     'Referer': 'http://www.pixiv.net/',
     'User-Agent': user_agent
@@ -12,8 +13,8 @@ headers1 = ({
 def mkdir(path):
     path = path.strip()
     path = path.rstrip("\\")
-    isExists = os.path.exists(path)
-    if not isExists:  # 如果不存在则创建目录
+    is_exists = os.path.exists(path)
+    if not is_exists:  # 如果不存在则创建目录
         print(path + ' Success')   # 创建目录操作函数
         os.makedirs(path)
         return True
@@ -22,12 +23,12 @@ def mkdir(path):
         return False
 
 
-def save(Number, dataids, text, cookies, path,ceiling=4):
+def save(number, dataids, text, cookies, path, ceiling=4):
     i = 0
-    Number=Number
+    number = number
 
-    while i < Number :
-        b=0
+    while i < number:
+        b = 0
         dataidurl = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + str(dataids[i])
         res1 = requests.get(url=dataidurl, cookies=cookies,
                             headers=headers1)  # 相应id网站
@@ -37,23 +38,23 @@ def save(Number, dataids, text, cookies, path,ceiling=4):
         if not originaltus:
             dataidurl = 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + str(dataids[i])
             res2 = requests.get(url=dataidurl, cookies=cookies,
-                            headers=headers1)  # 相应id网站
+                                headers=headers1)  # 相应id网站
             content2 = res2.text
             pattern2 = re.compile('(?<=data-filter="manga-image" data-src=")\S*(?=" data-index)')
-            originaltus= re.findall(pattern2, content2)
+            originaltus = re.findall(pattern2, content2)
             if not originaltus:
                 print(str(dataids[i]) + 'not found')
-                i=i+1
+                i += 1
                 continue
 
         for originaltu in originaltus:
-            b=b+1
-        if b>=ceiling:
+            b += 1
+        if b >= ceiling:
             print(str(dataids[i])+' is too long')
-            i=i+1
+            i += 1
             continue
         else:
-            b=0#判断id图片是否过多
+            b = 0  # 判断id图片是否过多
 
         for originaltu in originaltus:
             content3 = originaltu
@@ -65,38 +66,38 @@ def save(Number, dataids, text, cookies, path,ceiling=4):
                     str1 = 'png'  # 判断后缀是jpg还是png
             '''print(dataids[i] +'-'+str(b)+ ' is downloading')'''
             string = 'pixiv' + str(dataids[i]) + '-' + 'p' + str(b) + '.' + str1
-            if isExists:
+            if is_exists:
                 filesize = os.path.getsize(path+'\\'+string)
                 if filesize == 0:
                     os.remove(path+'\\'+string)
-                    isExists == False
+                    is_exists = False
                 elif str1 == 'jpg':
-                    f = open(path+'\\'+string,'rb')
-                    f.seek(-2,2)
+                    f = open(path+'\\'+string, 'rb')
+                    f.seek(-2, 2)
                     if f.read() != '\xff\xd9':
                         f.close()
                         os.remove(path+'\\'+string)
-                        isExists = False
+                        is_exists = False
                     else:
                         f.close()
                 else:
                     pass
-            if not isExists:
-                pic = requests.get(originaltu, stream=True,cookies=cookies, headers=headers1)
+            if not is_exists:
+                pic = requests.get(originaltu, stream=True, cookies=cookies, headers=headers1)
                 fp = open(path + '\\' + string, 'wb')
                 fp.write(pic.content)
                 fp.close()  # 保存图片
                 '''print(dataids[i]+'-'+str(b) + ' download is Success')'''
-                b=b+1
+                b += 1
             else:
-                b=b+1
-        i = i + 1
+                b += 1
+        i += 1
 
-    if Number == 0:
+    if number == 0:
         if len(dataids) > 30:
             print('All Download')
         for i in dataids:
-            b=0
+            b = 0
             dataidurl = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + str(i)
             res1 = requests.get(url=dataidurl, cookies=cookies,
                                 headers=headers1)  # 相应id网站
@@ -106,21 +107,21 @@ def save(Number, dataids, text, cookies, path,ceiling=4):
             if not originaltus:
                 dataidurl = 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + str(i)
                 res2 = requests.get(url=dataidurl, cookies=cookies,
-                                headers=headers1)  # 相应id网站
+                                    headers=headers1)  # 相应id网站
                 content2 = res2.text
                 pattern2 = re.compile('(?<=data-filter="manga-image" data-src=")\S*(?=" data-index)')
-                originaltus= re.findall(pattern2, content2)
+                originaltus = re.findall(pattern2, content2)
                 if not originaltus:
                     print(str(i) + 'not found')
                     continue
 
             for originaltu in originaltus:
-                b=b+1
-            if b>=ceiling:
+                b += 1
+            if b >= ceiling:
                 print(str(i)+' is too long')
                 continue
             else:
-                b=0#判断id图片是否过多
+                b = 0  # 判断id图片是否过多
 
             for originaltu in originaltus:
                 content3 = originaltu
@@ -131,31 +132,30 @@ def save(Number, dataids, text, cookies, path,ceiling=4):
                 else:
                         str1 = 'png'  # 判断后缀是jpg还是png
                 '''print(i +'-'+str(b)+ ' is downloading')'''
-                string = 'pixiv' + str(i) + '-' + 'p' + str(b) + '.' + str1 
-                isExists = os.path.exists(path+'\\'+string)
-                if isExists:
+                string = 'pixiv' + str(i) + '-' + 'p' + str(b) + '.' + str1
+                is_exists = os.path.exists(path+'\\'+string)
+                if is_exists:
                     filesize = os.path.getsize(path+'\\'+string)
                     if filesize == 0:
                         os.remove(path+'\\'+string)
-                        isExists == False
+                        is_exists = False
                     elif str1 == 'jpg':
-                        f = open(path+'\\'+string,'rb')
-                        f.seek(-2,2)
+                        f = open(path+'\\'+string, 'rb')
+                        f.seek(-2, 2)
                         if f.read() != '\xff\xd9':
                             f.close()
                             os.remove(path+'\\'+string)
-                            isExists = False
+                            is_exists = False
                         else:
                             f.close()
                     else:
                         pass
-                if not isExists:
-                    pic = requests.get(originaltu, stream=True,cookies=cookies, headers=headers1)
+                if not is_exists:
+                    pic = requests.get(originaltu, stream=True, cookies=cookies, headers=headers1)
                     fp = open(path + '\\' + string, 'wb')
                     fp.write(pic.content)
                     fp.close()  # 保存图片
                     '''print(i+'-'+str(b) + ' download is Success')'''
-                    b=b+1
+                    b += 1
                 else:
-                    b=b+1
-            
+                    b += 1

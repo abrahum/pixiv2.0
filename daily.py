@@ -1,23 +1,25 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 import requests
 import re
 
-user_agent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'
+user_agent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/\
+537.36'
 
-headers1= ({
+headers1 = ({
     'Referer': 'http://www.pixiv.net/',
     'User-Agent': user_agent
 })
 
-def getid(r18=False,date=''):
-    if date=='':
+
+def getid(r18=False, date=''):
+    if date == '':
         url1 = 'http://www.pixiv.net/ranking.php?mode=daily'
     else:
         url1 = 'http://www.pixiv.net/ranking.php?mode=daily&date=' + str(date)
     if r18:
-        url1 = 'http://www.pixiv.net/ranking.php?mode=daily_r18' #每日排行榜
-    res1 = requests.get(url1,headers=headers1)
+        url1 = 'http://www.pixiv.net/ranking.php?mode=daily_r18'  # 每日排行榜
+    res1 = requests.get(url1, headers=headers1)
 
     content2 = res1.text
     pattern2 = re.compile('(?<=data-id=")\S*(?=">)')
