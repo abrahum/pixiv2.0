@@ -142,6 +142,7 @@ class Pixiv(object):
         self.sdate = self.date
         self.threads = False
         self.dataids = []
+        self.async_able = False
 
     def daily_download(self):
         if self.sdate == '':
@@ -154,9 +155,23 @@ class Pixiv(object):
         mkpath = 'dailyimg'+'\\'+mkpath+r18word(self.r18)
         if self.threads:
             self.threadsave(mkpath)
+        elif self.async_able:
+            saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, text=self.text, cookies=self.cookies, path=mkpath)
+            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('Daily Done')
+
+    def async_daily_download(self):
+        if self.sdate == '':
+            mkpath = str(time.strftime('%Y-%m-%d', time.localtime(time.time())))
+        else:
+            mkpath = str(self.sdate[0:4]+'-'+self.sdate[4:6]+'-'+self.sdate[6:])
+        self.dataids = daily.getid(r18=self.r18, date=self.date)
+        saveimg.mkdir('dailyimg')  # 调用函数
+        saveimg.mkdir('dailyimg'+'\\'+mkpath+r18word(self.r18))
+        mkpath = 'dailyimg'+'\\'+mkpath+r18word(self.r18)
+        saveimg.async_save(self.dataids, self.cookies, mkpath)
+        print('Async daily done')
 
     def super_daily_download(self):
         date = 20161000
@@ -185,7 +200,7 @@ class Pixiv(object):
         if self.threads:
             self.threadsave(mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, text=self.text, cookies=self.cookies, path=mkpath)
+            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('HighLike Done')
 
     def painter_download(self):
@@ -196,7 +211,7 @@ class Pixiv(object):
         if self.threads:
             self.threadsave(mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, text=self.text, cookies=self.cookies, path=mkpath)
+            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('Painter Done')
 
     def painter_bookmark_download(self):
@@ -207,7 +222,7 @@ class Pixiv(object):
         if self.threads:
             self.threadsave(mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, text=self.text, cookies=self.cookies, path=mkpath)
+            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('Painter\'s Bookmrak Done')
 
     def highlikegetid(self, startpage=0, leastpages=1000):
@@ -230,12 +245,12 @@ class Pixiv(object):
 
     def threadsave(self, mkpath):
         threads = []
-        eachsize = len(self.dataids)//19
+        each_size = len(self.dataids)//19
         for i in range(19):
-            t = threading.Thread(target=saveimg.save, args=(0, self.dataids[i*eachsize:(i+1)*eachsize], self.text,
+            t = threading.Thread(target=saveimg.save, args=(0, self.dataids[i*each_size:(i+1)*each_size],
                                                             self.cookies, mkpath))
             threads.append(t)
-        t = threading.Thread(target=saveimg.save, args=(0, self.dataids[19*eachsize:], self.text, self.cookies, mkpath))
+        t = threading.Thread(target=saveimg.save, args=(0, self.dataids[19*each_size:], self.cookies, mkpath))
         threads.append(t)
         for t in threads:
             t.start()
@@ -271,13 +286,13 @@ BBBBBBBBBBBBBBBBBBBBBBBBBBBB\
     inform = ""
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hrtm:i:l:p:",
-                                   ["r18", "thread", "mod=", "inform=", "leastlike=", "password="])
+        opts, args = getopt.getopt(sys.argv[1:], "hrtam:i:l:p:",
+                                   ["help", "r18", "thread", "async", "mod=", "inform=", "leastlike=", "password="])
     except getopt.GetoptError:
         print(help_message)
         sys.exit(2)
     for opt, arg in opts:
-        if opt == '-h':
+        if opt == ('-h', "help"):
             print(help_message)
             sys.exit()
         elif opt in ("-m", "--mod"):
@@ -288,6 +303,8 @@ BBBBBBBBBBBBBBBBBBBBBBBBBBBB\
             p.least_likes = int(arg)
         elif opt in ("-r", "--r18"):
             p.r18 = True
+        elif opt in ("-a", "--async"):
+            p.async_able = True
         elif opt in ("-t", "--thread"):
             p.threads = True
         elif opt in ("-p", "--password"):
@@ -312,9 +329,8 @@ BBBBBBBBBBBBBBBBBBBBBBBBBBBB\
         p.pid = inform
         get_cookies(p.pid, p.password, login=True)
     else:
-        print('mod:\nlogin    login to pixiv     -i:pid        -p <password>\
-        \ndaily    daily download     -i:date\nhighlike keyword download   -i\
-        :keyword    -l <leastlike> \npainter  painter download   -i:painterid\
-        \nbookmark bookmark download  -i:painterid')
+        print('mod:\nlogin    login to pixiv     -i:pid        -p <password>\ndaily    daily download     -i:date'
+              '\nhighlike keyword download   -i:keyword    -l <leastlike> \npainter  painter download   -i:painterid'
+              '\nbookmark bookmark download  -i:painterid')
     
     sys.exit(2)
