@@ -11,7 +11,7 @@ painter  painter download   -i:painterid
 bookmark bookmark download  -i:painterid
 ```
 当然啦，r18还是需要你的帐号是支持的······
-当前仅支持Win，Linux未适配。
+当前仅Win&Linux（未测试 untested）。
 
 login模式只需要一次登录就会生成cookies，之后自动读取cookies进行爬取。
 如果爬取时，出现http报错，可以尝试重新login。

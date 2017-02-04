@@ -20,6 +20,11 @@ headers1 = ({
     'User-Agent': user_agent
 })
 
+if sys.platform == 'win32':
+    path_break = '\\'
+else:
+    path_break = '/'
+
 
 def get_cookies(pid, password, login=False):
     filename = 'cookie.txt'
@@ -143,6 +148,8 @@ class Pixiv(object):
         self.threads = False
         self.dataids = []
         self.async_able = False
+        self.runing = []
+        self.done = 0
 
     def daily_download(self):
         if self.sdate == '':
@@ -151,8 +158,8 @@ class Pixiv(object):
             mkpath = str(self.sdate[0:4]+'-'+self.sdate[4:6]+'-'+self.sdate[6:])
         self.dataids = daily.getid(r18=self.r18, date=self.date)
         saveimg.mkdir('dailyimg')  # 调用函数
-        saveimg.mkdir('dailyimg'+'\\'+mkpath+r18word(self.r18))
-        mkpath = 'dailyimg'+'\\'+mkpath+r18word(self.r18)
+        saveimg.mkdir('dailyimg'+path_break+mkpath+r18word(self.r18))
+        mkpath = 'dailyimg'+path_break+mkpath+r18word(self.r18)
         if self.threads:
             self.threadsave(mkpath)
         elif self.async_able:
@@ -168,8 +175,8 @@ class Pixiv(object):
             mkpath = str(self.sdate[0:4]+'-'+self.sdate[4:6]+'-'+self.sdate[6:])
         self.dataids = daily.getid(r18=self.r18, date=self.date)
         saveimg.mkdir('dailyimg')  # 调用函数
-        saveimg.mkdir('dailyimg'+'\\'+mkpath+r18word(self.r18))
-        mkpath = 'dailyimg'+'\\'+mkpath+r18word(self.r18)
+        saveimg.mkdir('dailyimg'+path_break+mkpath+r18word(self.r18))
+        mkpath = 'dailyimg'+path_break+mkpath+r18word(self.r18)
         saveimg.async_save(self.dataids, self.cookies, mkpath)
         print('Async daily done')
 
@@ -195,8 +202,8 @@ class Pixiv(object):
         else:
             self.highlikegetid()
         saveimg.mkdir('highlikeimg')
-        saveimg.mkdir('highlikeimg'+'\\'+self.keyword+str(self.least_likes)+'like'+mkpath+r18word(self.r18))
-        mkpath = 'highlikeimg'+'\\'+self.keyword+str(self.least_likes) + 'like' + mkpath + r18word(self.r18)
+        saveimg.mkdir('highlikeimg'+path_break+self.keyword+str(self.least_likes)+'like'+mkpath+r18word(self.r18))
+        mkpath = 'highlikeimg'+path_break+self.keyword+str(self.least_likes) + 'like' + mkpath + r18word(self.r18)
         if self.threads:
             self.threadsave(mkpath)
         else:
@@ -206,8 +213,8 @@ class Pixiv(object):
     def painter_download(self):
         self.dataids = painter.getid(img_id=self.id, cookies=self.cookies)
         saveimg.mkdir('painters')
-        saveimg.mkdir('painters\\'+str(self.id))
-        mkpath = 'painters\\'+str(self.id)
+        saveimg.mkdir('painters'+path_break+str(self.id))
+        mkpath = 'painters'+path_break+str(self.id)
         if self.threads:
             self.threadsave(mkpath)
         else:
@@ -217,8 +224,8 @@ class Pixiv(object):
     def painter_bookmark_download(self):
         self.dataids = painter.getid2(img_id=self.id, cookies=self.cookies)
         saveimg.mkdir('painters')
-        saveimg.mkdir('painters\\'+str(self.id)+'bookmark')
-        mkpath = 'painters\\'+str(self.id)+'bookmark'
+        saveimg.mkdir('painters'+path_break+str(self.id)+'bookmark')
+        mkpath = 'painters'+path_break+str(self.id)+'bookmark'
         if self.threads:
             self.threadsave(mkpath)
         else:
@@ -247,15 +254,113 @@ class Pixiv(object):
         threads = []
         each_size = len(self.dataids)//19
         for i in range(19):
-            t = threading.Thread(target=saveimg.save, args=(0, self.dataids[i*each_size:(i+1)*each_size],
-                                                            self.cookies, mkpath))
+            t = threading.Thread(target=self.save, args=(self.dataids[i*each_size:(i+1)*each_size],
+                                                         self.cookies, mkpath))
             threads.append(t)
-        t = threading.Thread(target=saveimg.save, args=(0, self.dataids[19*each_size:], self.cookies, mkpath))
+        t = threading.Thread(target=self.save, args=(self.dataids[19*each_size:], self.cookies, mkpath))
         threads.append(t)
+        threads.append(threading.Thread(target=self.progress_bar))
         for t in threads:
             t.start()
-        for t in tqdm.tqdm(threads):
-            t.join(180)
+        for t in threads:
+            t.join()
+
+    def new_threadsave(self, mkpath):
+        threads = []
+        threads.append(threading.Thread(target=self.progress_bar))
+        for i in self.dataids:
+            t = threading.Thread(target=self.save, args=([i], self.cookies, mkpath))
+            threads.append(t)
+        for t in threads:
+            t.start()
+            while threading.active_count() > 20:
+                pass
+        for t in self.runing:
+            t.join()
+
+    def progress_bar(self):
+        print('0/'+str(len(self.dataids)), end='')
+        done = 0
+        while True:
+            if self.done > done:
+                print('\r'+str(self.done)+'/'+str(len(self.dataids)), end='')
+                done = self.done
+
+    def save(self, dataids, cookies, path, ceiling=4):
+        s = requests.session()
+        s.cookies = requests.utils.cookiejar_from_dict(cookies)
+        s.headers = headers1
+        self.runing.append(threading.current_thread())
+        if len(dataids) > 30:
+            print('All Download')
+        for i in dataids:
+            b = 0
+            dataidurl = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + str(i)
+            res1 = s.get(dataidurl)  # 相应id网站
+            content1 = res1.text
+            pattern1 = re.compile('(?<= data-src=")\S*(?=" class="original-image">)')
+            originaltus = re.findall(pattern1, content1)
+            if not originaltus:
+                dataidurl = 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + str(i)
+                res2 = s.get(dataidurl)  # 相应id网站
+                content2 = res2.text
+                pattern2 = re.compile('(?<=data-filter="manga-image" data-src=")\S*(?=" data-index)')
+                originaltus = re.findall(pattern2, content2)
+                if not originaltus:
+                    print(str(i) + 'not found')
+                    self.done += 1
+                    continue
+
+            for originaltu in originaltus:
+                b += 1
+            if b >= ceiling:
+                print(str(i) + ' is too long')
+                self.done += 1
+                continue
+            else:
+                b = 0  # 判断id图片是否过多
+
+            for originaltu in originaltus:
+                content3 = originaltu
+                pattern3 = re.compile('png')
+                ifpng = re.findall(pattern3, content3)
+                if not ifpng:
+                    str1 = 'jpg'
+                else:
+                    str1 = 'png'  # 判断后缀是jpg还是png
+                '''print(i +'-'+str(b)+ ' is downloading')'''
+                string = 'pixiv' + str(i) + '-' + 'p' + str(b) + '.' + str1
+                is_exists = os.path.exists(path + path_break + string)
+                '''if is_exists:
+                    filesize = os.path.getsize(path+'\\'+string)
+                    if filesize == 0:
+                        os.remove(path+'\\'+string)
+                        is_exists = False
+                    elif str1 == 'jpg':
+                        f = open(path+'\\'+string, 'rb')
+                        f.seek(-2, 2)
+                        if f.read() != '\xff\xd9':
+                            f.close()
+                            os.remove(path+'\\'+string)
+                            is_exists = False
+                        else:
+                            f.close()
+                    else:
+                        pass'''
+                if not is_exists:
+                    try:
+                        pic = s.get(originaltu, timeout=180)
+                        fp = open(path + path_break + string, 'wb')
+                        fp.write(pic.content)
+                        fp.close()  # 保存图片
+                        '''print(i+'-'+str(b) + ' download is Success')'''
+                        b += 1
+                    except requests.exceptions.ConnectionError:
+                        print('Read timed out.')
+                else:
+                    b += 1
+            self.done += 1
+        self.runing.remove(threading.current_thread())
 
 
 if __name__ == "__main__":

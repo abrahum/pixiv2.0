@@ -154,12 +154,15 @@ def save(number, dataids, cookies, path, ceiling=4):
                     else:
                         pass'''
                 if not is_exists:
-                    pic = s.get(originaltu)
-                    fp = open(path + '\\' + string, 'wb')
-                    fp.write(pic.content)
-                    fp.close()  # 保存图片
-                    '''print(i+'-'+str(b) + ' download is Success')'''
-                    b += 1
+                    try:
+                        pic = s.get(originaltu, timeout=180)
+                        fp = open(path + '\\' + string, 'wb')
+                        fp.write(pic.content)
+                        fp.close()  # 保存图片
+                        '''print(i+'-'+str(b) + ' download is Success')'''
+                        b += 1
+                    except requests.exceptions.ConnectionError:
+                        print('Read timed out.')
                 else:
                     b += 1
 
