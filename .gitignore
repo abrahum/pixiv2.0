@@ -7,6 +7,8 @@ img/
 painters/
 .idea/
 test.py
+web.py
+pixiv.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
