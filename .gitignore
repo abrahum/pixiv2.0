@@ -2,12 +2,12 @@
 cookie.txt
 highlikeimg/
 dailyimg/
+dbimg/
 img/
 .vscode/
 painters/
 .idea/
 test.py
-web.py
 pixiv.db
 
 # Byte-compiled / optimized / DLL files

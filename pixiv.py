@@ -12,7 +12,8 @@ import painter
 import threading
 import tqdm
 import getopt
-import web
+import db
+import sqlite3
 
 user_agent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML,\
  like Gecko) Chrome/50.0.2661.102 Safari/537.36'
@@ -151,6 +152,26 @@ class Pixiv(object):
         self.async_able = False
         self.runing = []
         self.done = 0
+
+    def db_download(self):
+        con = sqlite3.connect('pixiv.db')
+        cur = con.cursor()
+        cur.execute('SELECT COUNT(1)')
+        acom = 'SELECT * FROM IMGS WHERE LIKENUM > ' + str(self.least_likes) + ' AND TAG LIKE "%' + self.keyword + '%"'
+        cur.execute(acom)
+        tem = cur.fetchall()
+        for i in tem:
+            self.dataids.append(i[0])
+        saveimg.mkdir('dbimg')
+        saveimg.mkdir('dbimg' + path_break + self.keyword + str(self.least_likes) + 'like')
+        mkpath = 'dbimg' + path_break + self.keyword + str(self.least_likes) + 'like'
+        if self.threads:
+            self.threadsave(mkpath)
+        elif self.async_able:
+            saveimg.async_save(self.dataids, self.cookies, mkpath)
+        else:
+            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
+        print('DB Done')
 
     def daily_download(self):
         if self.sdate == '':
@@ -425,6 +446,13 @@ BBBBBBBBBBBBBBBBBBBBBBBBBBBB\
     elif mod == "highlike":
         p.keyword = inform
         p.highlink_download()
+    elif mod == 'dbdownload':
+        p.keyword = inform
+        p.db_download()
+    elif mod == 'bdb':
+        s = db.BookmarkSpider(p.cookies)
+        s.build_pool()
+        s.run()
     elif mod == "painter":
         p.id = inform
         p.painter_download()
