@@ -15,8 +15,8 @@ import getopt
 import db
 import sqlite3
 
-user_agent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML,\
- like Gecko) Chrome/50.0.2661.102 Safari/537.36'
+user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
+             'Chrome/56.0.2924.87 Safari/537.36'
 headers1 = ({
     'Referer': 'http://www.pixiv.net/',
     'User-Agent': user_agent
@@ -166,7 +166,7 @@ class Pixiv(object):
         saveimg.mkdir('dbimg' + path_break + self.keyword + str(self.least_likes) + 'like')
         mkpath = 'dbimg' + path_break + self.keyword + str(self.least_likes) + 'like'
         if self.threads:
-            self.threadsave(mkpath)
+            self.new_threadsave(mkpath)
         elif self.async_able:
             saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
@@ -289,7 +289,8 @@ class Pixiv(object):
 
     def new_threadsave(self, mkpath):
         threads = []
-        threads.append(threading.Thread(target=self.progress_bar))
+        progarss_thread = threading.Thread(target=self.progress_bar)
+        threads.append(progarss_thread)
         for i in self.dataids:
             t = threading.Thread(target=self.save, args=([i], self.cookies, mkpath))
             threads.append(t)
@@ -297,18 +298,23 @@ class Pixiv(object):
             t.start()
             while threading.active_count() > 20:
                 pass
-        for t in self.runing:
-            t.join()
+        progarss_thread.join()
 
     def progress_bar(self):
         print('0/'+str(len(self.dataids)), end='')
         done = 0
+        timelock = time.time()
         while True:
             if self.done > done:
                 print('\r'+str(self.done)+'/'+str(len(self.dataids)), end='')
                 done = self.done
+                timelock = time.time()
+            elif self.done == len(self.dataids) or time.time()-timelock > 30:
+                sys.exit()
+            else:
+                pass
 
-    def save(self, dataids, cookies, path, ceiling=4):
+    def save(self, dataids, cookies, path):
         s = requests.session()
         s.cookies = requests.utils.cookiejar_from_dict(cookies)
         s.headers = headers1
@@ -324,7 +330,7 @@ class Pixiv(object):
             originaltus = re.findall(pattern1, content1)
             if not originaltus:
                 dataidurl = 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + str(i)
-                res2 = s.get(dataidurl)  # 相应id网站
+                res2 = s.get(dataidurl)# 相应id网站
                 content2 = res2.text
                 pattern2 = re.compile('(?<=data-filter="manga-image" data-src=")\S*(?=" data-index)')
                 originaltus = re.findall(pattern2, content2)
@@ -335,7 +341,7 @@ class Pixiv(object):
 
             for originaltu in originaltus:
                 b += 1
-            if b >= ceiling:
+            if b >= self.ceiling:
                 print(str(i) + ' is too long')
                 self.done += 1
                 continue

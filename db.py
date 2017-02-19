@@ -67,7 +67,7 @@ class BookmarkSpider(object):
                 lis = re.findall('<li class="image-item" id="li_\d+"><a href="member_illust.php?[^收]+',
                                  bookmark_html.text)
                 page += 1
-                print('\c' + str(p.id), page, len(lis))
+                print('\r' + str(p.id), page, len(lis))
             for i in targets:
                 img = PixivImg()
                 uper = Painter()
@@ -119,7 +119,7 @@ class Painter(object):
         acom = 'SELECT * FROM painters WHERE ID=' + str(self.id)
         cur.execute(acom)
         if not cur.fetchall():
-            acom = 'INSERT INTO painters VALUES('+str(self.id)+',"'+str(self.name)+'",'+\
+            acom = 'INSERT INTO painters VALUES('+str(self.id)+',"'+str(self.name)+'",' + \
                    str(self.update_time)+',NULL,NULL)'
             cur.execute(acom)
         else:
