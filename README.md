@@ -7,7 +7,7 @@ mod:
 login    login to pixiv     -i:pid        -p <password>
 daily    daily download     -i:date
 highlike keyword download   -i:keyword    -l <leastlike>
-database database download  -i:keyword    -l <leastlike> (nead builded database)
+database database download  -i:keyword    -l <leastlike> (need builded database)
 painter  painter download   -i:painterid
 bookmark bookmark download  -i:painterid
 ```

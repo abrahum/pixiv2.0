@@ -409,7 +409,7 @@ if __name__ == "__main__":
                    "\n\npixiv.py -m <mod> -i <inform>\n         -r <r18>    enable r18(disable for daily mod)\n" \
                    "         -t <thread> enable threads\nmod:\nlogin    login to pixiv     -i:pid        " \
                    "-p <password>\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    " \
-                   "-l <leastlike>\ndatabase database download  -i:keyword    -l <leastlike> (nead builded database)" \
+                   "-l <leastlike>\ndatabase database download  -i:keyword    -l <leastlike> (need builded database)" \
                    "\npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid"
 
     mod = ""
