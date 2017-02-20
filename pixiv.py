@@ -449,7 +449,7 @@ if __name__ == "__main__":
     elif mod == "highlike":
         p.keyword = inform
         p.highlink_download()
-    elif mod == 'dbdownload':
+    elif mod == 'database':
         p.keyword = inform
         p.db_download()
     elif mod == 'bdb':
