@@ -1,12 +1,13 @@
 # pixiv2.0
-```
+```shell
 pixiv.py -m <mod> -i <inform>
          -r <r18>    enable r18(disable for daily mod)
          -t <thread> enable threads
 mod:
 login    login to pixiv     -i:pid        -p <password>
 daily    daily download     -i:date
-highlike keyword download   -i:keyword    -l <leastlike> 
+highlike keyword download   -i:keyword    -l <leastlike>
+database database download  -i:keyword    -l <leastlike> (nead builded database)
 painter  painter download   -i:painterid
 bookmark bookmark download  -i:painterid
 ```

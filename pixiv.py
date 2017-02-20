@@ -143,15 +143,17 @@ class Pixiv(object):
         self.r18 = False  # r18daily暂时无效
         self.least_likes = 500  # 高赞爬虫最少赞数
         self.least_pages = 1000  # 高赞页数
-        self.start_page = 0
+        self.start_page = 0  # 搜索的关键字开始爬取页数
         self.id = ''  # 画手id
-        self.date = ''
-        self.sdate = self.date
-        self.threads = False
-        self.dataids = []
-        self.async_able = False
-        self.runing = []
-        self.done = 0
+        self.date = ''  # daily的日期
+        self.sdate = self.date  # daily保存使用的日期
+        self.threads = False  # 是否允许多线程
+        self.dataids = []  # imgurl的保存lists
+        self.async_able = False  # 是否允许异步（多线程优先级高于异步）
+        self.runing = []  # 还在运行的线程
+        self.done = 0  # 已完成的下载数量
+
+    # 几种爬取方式
 
     def db_download(self):
         con = sqlite3.connect('pixiv.db')
@@ -183,24 +185,12 @@ class Pixiv(object):
         saveimg.mkdir('dailyimg'+path_break+mkpath+r18word(self.r18))
         mkpath = 'dailyimg'+path_break+mkpath+r18word(self.r18)
         if self.threads:
-            self.threadsave(mkpath)
+            self.new_threadsave(mkpath)
         elif self.async_able:
             saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
             saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('Daily Done')
-
-    def async_daily_download(self):
-        if self.sdate == '':
-            mkpath = str(time.strftime('%Y-%m-%d', time.localtime(time.time())))
-        else:
-            mkpath = str(self.sdate[0:4]+'-'+self.sdate[4:6]+'-'+self.sdate[6:])
-        self.dataids = daily.getid(r18=self.r18, date=self.date)
-        saveimg.mkdir('dailyimg')  # 调用函数
-        saveimg.mkdir('dailyimg'+path_break+mkpath+r18word(self.r18))
-        mkpath = 'dailyimg'+path_break+mkpath+r18word(self.r18)
-        saveimg.async_save(self.dataids, self.cookies, mkpath)
-        print('Async daily done')
 
     def super_daily_download(self):
         date = 20161000
@@ -227,7 +217,9 @@ class Pixiv(object):
         saveimg.mkdir('highlikeimg'+path_break+self.keyword+str(self.least_likes)+'like'+mkpath+r18word(self.r18))
         mkpath = 'highlikeimg'+path_break+self.keyword+str(self.least_likes) + 'like' + mkpath + r18word(self.r18)
         if self.threads:
-            self.threadsave(mkpath)
+            self.new_threadsave(mkpath)
+        elif self.async_able:
+            saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
             saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('HighLike Done')
@@ -238,7 +230,9 @@ class Pixiv(object):
         saveimg.mkdir('painters'+path_break+str(self.id))
         mkpath = 'painters'+path_break+str(self.id)
         if self.threads:
-            self.threadsave(mkpath)
+            self.new_threadsave(mkpath)
+        elif self.async_able:
+            saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
             saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('Painter Done')
@@ -249,12 +243,14 @@ class Pixiv(object):
         saveimg.mkdir('painters'+path_break+str(self.id)+'bookmark')
         mkpath = 'painters'+path_break+str(self.id)+'bookmark'
         if self.threads:
-            self.threadsave(mkpath)
+            self.new_threadsave(mkpath)
+        elif self.async_able:
+            saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
             saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('Painter\'s Bookmrak Done')
 
-    def highlikegetid(self, startpage=0, leastpages=1000):
+    def highlikegetid(self, startpage=0, leastpages=1000):  # 关键字爬取函数
         base_url = r18c('http://www.pixiv.net/search.php?word=' + keyword_swich(self.keyword), self.r18)
         for i in range(startpage, leastpages):
             myurl = base_url + '&p=' + str(i+1)
@@ -272,7 +268,7 @@ class Pixiv(object):
             '''print('Page %d is Done' % (i+1))'''
         return self.dataids
 
-    def threadsave(self, mkpath):
+    def threadsave(self, mkpath):  # 旧版多线程下载方式
         threads = []
         each_size = len(self.dataids)//19
         for i in range(19):
@@ -287,7 +283,7 @@ class Pixiv(object):
         for t in threads:
             t.join()
 
-    def new_threadsave(self, mkpath):
+    def new_threadsave(self, mkpath):  # 新的多线程下载
         threads = []
         progarss_thread = threading.Thread(target=self.progress_bar)
         threads.append(progarss_thread)
@@ -300,7 +296,7 @@ class Pixiv(object):
                 pass
         progarss_thread.join()
 
-    def progress_bar(self):
+    def progress_bar(self):  # 简易进度条
         print('0/'+str(len(self.dataids)), end='')
         done = 0
         timelock = time.time()
@@ -314,7 +310,7 @@ class Pixiv(object):
             else:
                 pass
 
-    def save(self, dataids, cookies, path):
+    def save(self, dataids, cookies, path):  # 单线程保存
         s = requests.session()
         s.cookies = requests.utils.cookiejar_from_dict(cookies)
         s.headers = headers1
@@ -330,7 +326,7 @@ class Pixiv(object):
             originaltus = re.findall(pattern1, content1)
             if not originaltus:
                 dataidurl = 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + str(i)
-                res2 = s.get(dataidurl)# 相应id网站
+                res2 = s.get(dataidurl)  # 相应id网站
                 content2 = res2.text
                 pattern2 = re.compile('(?<=data-filter="manga-image" data-src=")\S*(?=" data-index)')
                 originaltus = re.findall(pattern2, content2)
@@ -393,27 +389,28 @@ class Pixiv(object):
 
 if __name__ == "__main__":
     p = Pixiv()
-    help_message = "BBBBBBBBBBBBBBBBBBBBBBBBBBBB\n\
-BBBBBBBB              BBBBBB\n\
-BBBBB    BBBBBBBBBBB    BBBB\n\
-BBB     BBBBBBBBBBBBBB   BBB\n\
-B   B#  BBBBBBBBBBBBBBB   BB\n\
-B  BB#  BBBBBBBBBBBBBBB    B\n\
-BB#BB#  BBBBBBBBBBBBBBB#   B\n\
-BBBBB#  BBBBBBBBBBBBBBB-   B\n\
-BBBBB#  BBBBBBBBBBBBBBB    B\n\
-BBBBB#  BBBBBBBBBBBBBB    BB\n\
-BBBBB#  BBBBBBBBBBBBB    BBB\n\
-BBBBB#    BBBBBBBBB    BBBBB\n\
-BBBBB#  BB          BBBBBBBB\n\
-BBBBB#  BBBBBBBBBBBBBBBBBBBB\n\
-BBBBB#  BBBBBBBBBBBBBBBBBBBB\n\
-BBBB      BBBBBBBBBBBBBBBBBB\n\
-BBBBBBBBBBBBBBBBBBBBBBBBBBBB\
-\npixiv.py -m <mod> -i <inform>\n         -r <r18>    enable r18(disable for daily mod)\
-\n         -t <thread> enable threads\n\nmod:\nlogin    login to pixiv     -i:pid        -p <password>\
-\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    -l <leastlike> \
-\npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid"
+    help_message = "BBBBBBBBBBBBBBBBBBBBBBBBBBBB\n"\
+                   "BBBBBBBB              BBBBBB\n"\
+                   "BBBBB    BBBBBBBBBBB    BBBB\n"\
+                   "BBB     BBBBBBBBBBBBBB   BBB\n"\
+                   "B   B#  BBBBBBBBBBBBBBB   BB\n"\
+                   "B  BB#  BBBBBBBBBBBBBBB    B\n"\
+                   "BB#BB#  BBBBBBBBBBBBBBB#   B\n"\
+                   "BBBBB#  BBBBBBBBBBBBBBB-   B\n"\
+                   "BBBBB#  BBBBBBBBBBBBBBB    B\n"\
+                   "BBBBB#  BBBBBBBBBBBBBB    BB\n"\
+                   "BBBBB#  BBBBBBBBBBBBB    BBB\n"\
+                   "BBBBB#    BBBBBBBBB    BBBBB\n"\
+                   "BBBBB#  BB          BBBBBBBB\n"\
+                   "BBBBB#  BBBBBBBBBBBBBBBBBBBB\n"\
+                   "BBBBB#  BBBBBBBBBBBBBBBBBBBB\n"\
+                   "BBBB      BBBBBBBBBBBBBBBBBB\n"\
+                   "BBBBBBBBBBBBBBBBBBBBBBBBBBBB"\
+                   "\n\npixiv.py -m <mod> -i <inform>\n         -r <r18>    enable r18(disable for daily mod)\n" \
+                   "         -t <thread> enable threads\nmod:\nlogin    login to pixiv     -i:pid        " \
+                   "-p <password>\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    " \
+                   "-l <leastlike>\ndatabase database download  -i:keyword    -l <leastlike> (nead builded database)" \
+                   "\npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid"
 
     mod = ""
     inform = ""
@@ -469,8 +466,6 @@ BBBBBBBBBBBBBBBBBBBBBBBBBBBB\
         p.pid = inform
         get_cookies(p.pid, p.password, login=True)
     else:
-        print('mod:\nlogin    login to pixiv     -i:pid        -p <password>\ndaily    daily download     -i:date'
-              '\nhighlike keyword download   -i:keyword    -l <leastlike> \npainter  painter download   -i:painterid'
-              '\nbookmark bookmark download  -i:painterid')
+        print(help_message)
     
     sys.exit(2)
