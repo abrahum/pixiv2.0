@@ -3,9 +3,9 @@ import requests
 import re
 import os
 import asyncio
+import time
 
-user_agent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/\
-537.36'
+user_agent = 'User-Agent,Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
 headers1 = ({
     'Referer': 'http://www.pixiv.net/',
     'User-Agent': user_agent
@@ -31,7 +31,7 @@ def save(number, dataids, cookies, path, ceiling=4):
     s = requests.session()
     s.cookies = requests.utils.cookiejar_from_dict(cookies)
     s.headers = headers1
-
+    #print(ceiling)
     while i < number:
         b = 0
         dataidurl = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + str(dataids[i])
@@ -104,24 +104,49 @@ def save(number, dataids, cookies, path, ceiling=4):
         for i in dataids:
             b = 0
             dataidurl = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + str(i)
-            res1 = s.get(dataidurl)  # 相应id网站
+            # res1 = s.get(dataidurl)  # 相应id网站
+            try:
+                res1 = s.get(dataidurl)  # 相应id网站
+            except:
+                try:
+                    print('try again')
+                    time.sleep(3)
+                    res1 = s.get(dataidurl)  # 相应id网站
+                except:
+                    print('connect error')
             content1 = res1.text
             pattern1 = re.compile('(?<= data-src=")\S*(?=" class="original-image">)')
             originaltus = re.findall(pattern1, content1)
             if not originaltus:
+                print('pic grp')
                 dataidurl = 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + str(i)
-                res2 = s.get(dataidurl)  # 相应id网站
+                # res2 = s.get(dataidurl)  # 相应id网站
+                try:
+                    res2 = s.get(dataidurl)  # 相应id网站
+                except:
+                    try:
+                        print('try again')
+                        time.sleep(3)
+                        res2 = s.get(dataidurl)  # 相应id网站
+                    except:
+                        print('connect error')
                 content2 = res2.text
                 pattern2 = re.compile('(?<=data-filter="manga-image" data-src=")\S*(?=" data-index)')
                 originaltus = re.findall(pattern2, content2)
                 if not originaltus:
-                    print(str(i) + 'not found')
+                    print(str(i) + 'may gif')
+                    ft = open(path+'\\'+'gifid.txt','a')
+                    ft.write(str(i)+'\n')
+                    ft.close
                     continue
 
             for originaltu in originaltus:
                 b += 1
             if b >= ceiling:
                 print(str(i)+' is too long')
+                ft = open(path+'\\'+'long picid.txt','a')
+                ft.write(str(i)+'\n')
+                ft.close
                 continue
             else:
                 b = 0  # 判断id图片是否过多
@@ -159,7 +184,7 @@ def save(number, dataids, cookies, path, ceiling=4):
                         fp = open(path + '\\' + string, 'wb')
                         fp.write(pic.content)
                         fp.close()  # 保存图片
-                        '''print(i+'-'+str(b) + ' download is Success')'''
+                        print(i+'-'+str(b) + ' download is Success')
                         b += 1
                     except requests.exceptions.ConnectionError:
                         print('Read timed out.')
