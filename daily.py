@@ -17,7 +17,7 @@ def getid(r18=False, date='', cookies=''):
             if date == '': 
                 url1 = 'http://www.pixiv.net/ranking.php?mode=daily_r18'  # 每日排行榜
             else:
-                url1 = 'http://www.pixiv.net/ranking.php?mode=r18g&date=' + str(date)
+                url1 = 'http://www.pixiv.net/ranking.php?mode=daily_r18&date=' + str(date)
         else:
             print('no cookies')
             exit()
