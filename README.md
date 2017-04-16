@@ -1,4 +1,4 @@
-# pixiv2.0
+# pixiv2.0.1
 ```shell
 pixiv.py -m <mod> -i <inform>
          -r <r18>    enable r18(disable for daily mod)
