@@ -10,7 +10,30 @@ headers1 = ({
     'Referer': 'http://www.pixiv.net/',
     'User-Agent': user_agent
 })
+msg1 = 'is too long'
+msg2 = ' may gif'
+filename1 = 'long picid.txt'
+filename2 = 'gifid.txt'
 
+def reget(dataidurl,s):
+    try:
+        res = s.get(dataidurl)  # 相应id网站
+        return res
+    except:
+        try:
+            print('try again')
+            time.sleep(3)
+            res = s.get(dataidurl)  # 相应id网站
+            return res
+        except:
+            print('connect error')
+            return 0
+
+def writetxt(path,str,msg,filename):
+    print(str+msg)
+    ft = open(path+'\\'+filename,'a')    #将图id号输出到txt，以便自行查看
+    ft.write(str+'\n')
+    ft.close
 
 def mkdir(path):
     path = path.strip()
@@ -35,20 +58,40 @@ def save(number, dataids, cookies, path, ceiling=4):
     while i < number:
         b = 0
         dataidurl = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + str(dataids[i])
-        res1 = requests.get(url=dataidurl, cookies=cookies,
-                            headers=headers1)  # 相应id网站
+        #res1 = requests.get(url=dataidurl, cookies=cookies,
+          #                  headers=headers1)  # 相应id网站
+        # try:
+        #         res1 = s.get(dataidurl)  # 相应id网站
+        # except:
+        #     try:
+        #         print('try again')
+        #         time.sleep(3)
+        #         res1 = s.get(dataidurl)  # 相应id网站
+        #     except:
+        #         print('connect error')
+        res1 = reget(dataidurl,s)
         content1 = res1.text
         pattern1 = re.compile('(?<= data-src=")\S*(?=" class="original-image">)')
         originaltus = re.findall(pattern1, content1)
         if not originaltus:
             dataidurl = 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + str(dataids[i])
-            res2 = requests.get(url=dataidurl, cookies=cookies,
-                                headers=headers1)  # 相应id网站
+            #res2 = requests.get(url=dataidurl, cookies=cookies,
+             #                   headers=headers1)  # 相应id网站
+            # try:
+            #     res2 = s.get(dataidurl)  # 相应id网站
+            # except:
+            #     try:
+            #         print('try again')
+            #         time.sleep(3)
+            #         res2 = s.get(dataidurl)  # 相应id网站
+            #     except:
+            #         print('connect error')
+            res2 = reget(dataidurl,s)
             content2 = res2.text
             pattern2 = re.compile('(?<=data-filter="manga-image" data-src=")\S*(?=" data-index)')
             originaltus = re.findall(pattern2, content2)
             if not originaltus:
-                print(str(dataids[i]) + 'not found')
+                writetxt(path,str(i),msg2,filename2)
                 i += 1
                 continue
 
@@ -105,15 +148,7 @@ def save(number, dataids, cookies, path, ceiling=4):
             b = 0
             dataidurl = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + str(i)
             # res1 = s.get(dataidurl)  # 相应id网站
-            try:
-                res1 = s.get(dataidurl)  # 相应id网站
-            except:
-                try:
-                    print('try again')
-                    time.sleep(3)
-                    res1 = s.get(dataidurl)  # 相应id网站
-                except:
-                    print('connect error')
+            res1 = reget(dataidurl,s)
             content1 = res1.text
             pattern1 = re.compile('(?<= data-src=")\S*(?=" class="original-image">)')
             originaltus = re.findall(pattern1, content1)
@@ -121,32 +156,26 @@ def save(number, dataids, cookies, path, ceiling=4):
                 print('pic grp')
                 dataidurl = 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + str(i)
                 # res2 = s.get(dataidurl)  # 相应id网站
-                try:
-                    res2 = s.get(dataidurl)  # 相应id网站
-                except:
-                    try:
-                        print('try again')
-                        time.sleep(3)
-                        res2 = s.get(dataidurl)  # 相应id网站
-                    except:
-                        print('connect error')
+                res2 = reget(dataidurl,s)
                 content2 = res2.text
                 pattern2 = re.compile('(?<=data-filter="manga-image" data-src=")\S*(?=" data-index)')
                 originaltus = re.findall(pattern2, content2)
                 if not originaltus:
-                    print(str(i) + 'may gif')
-                    ft = open(path+'\\'+'gifid.txt','a')
-                    ft.write(str(i)+'\n')
-                    ft.close
+                    # print(str(i) + 'may gif')
+                    # ft = open(path+'\\'+'gifid.txt','a')    #将gif图 id号输出到txt，以便自行查看
+                    # ft.write(str(i)+'\n')
+                    # ft.close
+                    writetxt(path,str(i),msg2,filename2)
                     continue
 
             for originaltu in originaltus:
                 b += 1
             if b >= ceiling:
-                print(str(i)+' is too long')
-                ft = open(path+'\\'+'long picid.txt','a')
-                ft.write(str(i)+'\n')
-                ft.close
+                # print(str(i)+' is too long')
+                # ft = open(path+'\\'+'long picid.txt','a')    #将过长的组图id号输出到txt，以便自行查看
+                # ft.write(str(i)+'\n')
+                # ft.close
+                writetxt(path,str(i),msg1,filename1)
                 continue
             else:
                 b = 0  # 判断id图片是否过多
@@ -205,13 +234,14 @@ async def simgle_async_save(i, path, ceiling=4):
         pattern2 = re.compile('(?<=data-filter="manga-image" data-src=")\S*(?=" data-index)')
         originaltus = re.findall(pattern2, content2)
         if not originaltus:
-            print(str(i) + 'not found')
+            writetxt(path,str(i),msg2,filename2)
             return 0
 
     for originaltu in originaltus:
         b += 1
     if b >= ceiling:
-        print(str(i)+' is too long')
+        #print(str(i)+' is too long')
+        writetxt(path,str(i),msg1,filename1)
         return 0
     else:
         b = 0  # 判断id图片是否过多

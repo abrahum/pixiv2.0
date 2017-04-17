@@ -233,7 +233,7 @@ class Pixiv(object):
         elif self.async_able:
             saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
+            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath, ceiling=self.ceiling)
         print('Painter Done')
 
     def painter_bookmark_download(self):
@@ -246,7 +246,7 @@ class Pixiv(object):
         elif self.async_able:
             saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
+            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath, ceiling=self.ceiling)
         print('Painter\'s Bookmrak Done')
 
     def highlikegetid(self, startpage=0, leastpages=1000):  # 关键字爬取函数
@@ -319,25 +319,35 @@ class Pixiv(object):
         for i in dataids:
             b = 0
             dataidurl = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + str(i)
-            res1 = s.get(dataidurl)  # 相应id网站
+            #res1 = s.get(dataidurl)  # 相应id网站
+            res1 = saveimg.reget(dataidurl,s)
             content1 = res1.text
             pattern1 = re.compile('(?<= data-src=")\S*(?=" class="original-image">)')
             originaltus = re.findall(pattern1, content1)
             if not originaltus:
                 dataidurl = 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + str(i)
-                res2 = s.get(dataidurl)  # 相应id网站
+                #res2 = s.get(dataidurl)  # 相应id网站
+                res2 = saveimg.reget(dataidurl,s)
                 content2 = res2.text
                 pattern2 = re.compile('(?<=data-filter="manga-image" data-src=")\S*(?=" data-index)')
                 originaltus = re.findall(pattern2, content2)
                 if not originaltus:
-                    print(str(i) + 'not found')
+                    #print(str(i) + 'not found')
+                    print(str(i) + ' may gif')
+                    ft = open(path+'\\'+'gifid.txt','a')    #将gif图 id号输出到txt，以便自行查看
+                    ft.write(str(i)+'\n')
+                    ft.close
                     self.done += 1
                     continue
 
             for originaltu in originaltus:
                 b += 1
             if b >= self.ceiling:
-                print(str(i) + ' is too long')
+                #print(str(i) + ' is too long')
+                print(str(i)+' is too long')
+                ft = open(path+'\\'+'long picid.txt','a')    #将过长的组图id号输出到txt，以便自行查看
+                ft.write(str(i)+'\n')
+                ft.close
                 self.done += 1
                 continue
             else:
@@ -376,7 +386,7 @@ class Pixiv(object):
                         fp = open(path + path_break + string, 'wb')
                         fp.write(pic.content)
                         fp.close()  # 保存图片
-                        '''print(i+'-'+str(b) + ' download is Success')'''
+                        print(i+'-'+str(b) + ' download is Success')
                         b += 1
                     except requests.exceptions.ConnectionError:
                         print('Read timed out.')

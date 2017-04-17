@@ -36,6 +36,5 @@ def getid(r18=False, date='', cookies=''):
         exit()
         # 判断是否成功
     print('getids is Success')
-    time.sleep(2)  # 防止太快被反
-    print(dataids)
+    #print(dataids)
     return dataids
