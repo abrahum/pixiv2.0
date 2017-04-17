@@ -144,6 +144,7 @@ class Pixiv(object):
         self.least_pages = 1000  # 高赞页数
         self.start_page = 0  # 搜索的关键字开始爬取页数
         self.id = ''  # 画手id
+        self.type = 'daily'  #主页模式选择  默认 daily 1.daily 2.weekly 3.male 4.female
         self.date = ''  # daily的日期
         self.sdate = self.date  # daily保存使用的日期
         self.threads = False  # 是否允许多线程
@@ -417,16 +418,18 @@ if __name__ == "__main__":
                    "BBBBBBBBBBBBBBBBBBBBBBBBBBBB"\
                    "\n\npixiv.py -m <mod> -i <inform>\n         -r <r18>    enable r18(disable for daily mod)\n" \
                    "         -t <thread> enable threads\nmod:\nlogin    login to pixiv     -i:pid        " \
-                   "-p <password>\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    " \
+                   "-p <password>\nnormal    daily download     -i:date\nhighlike keyword download   -i:keyword    " \
                    "-l <leastlike>\ndatabase database download  -i:keyword    -l <leastlike> (need builded database)" \
                    "\npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid"
 
     mod = ""
+    type = ""
     inform = ""
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hrtam:i:l:p:",
-                                   ["help", "r18", "thread", "async", "mod=", "inform=", "leastlike=", "password="])
+                                   ["help", "r18", "thread", "async", "type=" 
+                                   "mod=", "inform=", "leastlike=", "password="])
     except getopt.GetoptError:
         print(help_message)
         sys.exit(2)
@@ -436,6 +439,8 @@ if __name__ == "__main__":
             sys.exit()
         elif opt in ("-m", "--mod"):
             mod = arg
+        elif opt in ("-t", "--type"):
+            type = arg
         elif opt in ("-i", "--inform"):
             inform = arg
         elif opt in ("-l", "--leastlike"):
@@ -451,7 +456,8 @@ if __name__ == "__main__":
         
     p.cookies = get_cookies(p.pid, p.password)
             
-    if mod == "daily":
+    if mod == "normal":
+        p.type = type
         p.date = inform
         p.sdate = p.date
         p.daily_download()
