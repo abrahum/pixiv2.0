@@ -27,6 +27,7 @@ def reget(dataidurl,s):
             return res
         except:
             print('connect error')
+            #sys.exit()
             return 0
 
 def writetxt(path,str,msg,filename):

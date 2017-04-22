@@ -10,20 +10,29 @@ headers1 = ({
 })
 
 
-def getid(r18=False, date='', cookies=''):
+def getid(r18=False, date='', cookies='', types=''):
     if r18:
-        if cookies!='':
-            if date == '': 
-                url1 = 'http://www.pixiv.net/ranking.php?mode=daily_r18'  # 每日排行榜
+        if (types == 'daily') or (types =='weekly'):
+            if cookies!='':
+                if date == '': 
+                    url1 = 'http://www.pixiv.net/ranking.php?mode='+types+'_r18'  # 排行榜
+                else:
+                    url1 = 'http://www.pixiv.net/ranking.php?mode='+types+'_r18&date=' + str(date)
             else:
-                url1 = 'http://www.pixiv.net/ranking.php?mode=daily_r18&date=' + str(date)
+                print('no cookies')
+                exit()
         else:
-            print('no cookies')
+            print('types error,r18 only enabled for daily and weekly')
             exit()
-    elif date == '':
-        url1 = 'http://www.pixiv.net/ranking.php?mode=daily'
+    elif (types == 'daily') or (types =='weekly') or (types =='monthly') or (types =='male') or (types =='female'):
+        if date == '':
+            url1 = 'http://www.pixiv.net/ranking.php?mode='+types
+        else:
+            url1 = 'http://www.pixiv.net/ranking.php?mode='+types+'&date=' + str(date)  
     else:
-        url1 = 'http://www.pixiv.net/ranking.php?mode=daily&date=' + str(date)        
+        print('types error')
+        exit()
+              
     res1 = requests.get(url1, cookies=cookies, headers=headers1)
 
     content2 = res1.text
@@ -31,7 +40,7 @@ def getid(r18=False, date='', cookies=''):
     dataids = re.findall(pattern2, content2)  # 寻找id
     if not dataids:
         print('getids is error')
-        #print(url1,'\n',cookies)
+        print(url1)
         exit()
         # 判断是否成功
     print('getids is Success')
