@@ -144,6 +144,7 @@ class Pixiv(object):
         self.least_pages = 1000  # 高赞页数
         self.start_page = 0  # 搜索的关键字开始爬取页数
         self.id = ''  # 画手id
+        self.types = 'daily'  #主页模式选择  默认 daily 1.daily 2.weekly 3.male 4.female
         self.date = ''  # daily的日期
         self.sdate = self.date  # daily保存使用的日期
         self.threads = False  # 是否允许多线程
@@ -153,7 +154,7 @@ class Pixiv(object):
         self.done = 0  # 已完成的下载数量
 
     # 几种爬取方式
-
+ 
     def db_download(self):
         con = sqlite3.connect('pixiv.db')
         cur = con.cursor()
@@ -179,10 +180,11 @@ class Pixiv(object):
             mkpath = str(time.strftime('%Y-%m-%d', time.localtime(time.time())))
         else:
             mkpath = str(self.sdate[0:4]+'-'+self.sdate[4:6]+'-'+self.sdate[6:])
-        self.dataids = daily.getid(r18=self.r18, date=self.date, cookies=self.cookies)
-        saveimg.mkdir('dailyimg')  # 调用函数
-        saveimg.mkdir('dailyimg'+path_break+mkpath+r18word(self.r18))
-        mkpath = 'dailyimg'+path_break+mkpath+r18word(self.r18)
+        self.dataids = daily.getid(r18=self.r18, date=self.date, cookies=self.cookies,types=self.types)
+        saveimg.mkdir('ranking')  # ranking
+        saveimg.mkdir('ranking'+path_break+self.types+'img')  # 调用函数
+        saveimg.mkdir('ranking'+path_break+self.types+'img'+path_break+mkpath+r18word(self.r18))
+        mkpath = 'ranking'+path_break+self.types+'img'+path_break+mkpath+r18word(self.r18)
         if self.threads:
             self.new_threadsave(mkpath)
         elif self.async_able:
@@ -296,7 +298,7 @@ class Pixiv(object):
         progarss_thread.join()
 
     def progress_bar(self):  # 简易进度条
-        print('0/'+str(len(self.dataids)), end='')
+        print('0/'+str(len(self.dataids))+'\n', end='')
         done = 0
         timelock = time.time()
         while True:
@@ -415,18 +417,21 @@ if __name__ == "__main__":
                    "BBBBB#  BBBBBBBBBBBBBBBBBBBB\n"\
                    "BBBB      BBBBBBBBBBBBBBBBBB\n"\
                    "BBBBBBBBBBBBBBBBBBBBBBBBBBBB"\
-                   "\n\npixiv.py -m <mod> -i <inform>\n         -r <r18>    enable r18(disable for daily mod)\n" \
+                   "\n\npixiv.py -m <mod> -i <inform>\n         -r <r18>    enable r18(only for daily and weekly)\n" \
                    "         -t <thread> enable threads\nmod:\nlogin    login to pixiv     -i:pid        " \
-                   "-p <password>\ndaily    daily download     -i:date\nhighlike keyword download   -i:keyword    " \
+                   "-p <password>\nranking  ranking download     -i:date  -p:type(default:daily ,weekly, monthly, rookies, original, male, " \
+                   "female)\nhighlike keyword download   -i:keyword  " \
                    "-l <leastlike>\ndatabase database download  -i:keyword    -l <leastlike> (need builded database)" \
                    "\npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid"
 
     mod = ""
+    type = ""
     inform = ""
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hrtam:i:l:p:",
-                                   ["help", "r18", "thread", "async", "mod=", "inform=", "leastlike=", "password="])
+                                   ["help", "r18", "thread", "async", "type=" 
+                                   "mod=", "inform=", "leastlike=", "password="])
     except getopt.GetoptError:
         print(help_message)
         sys.exit(2)
@@ -436,6 +441,8 @@ if __name__ == "__main__":
             sys.exit()
         elif opt in ("-m", "--mod"):
             mod = arg
+        elif opt in ("-p", "--types"):
+            p.types = arg
         elif opt in ("-i", "--inform"):
             inform = arg
         elif opt in ("-l", "--leastlike"):
@@ -451,7 +458,8 @@ if __name__ == "__main__":
         
     p.cookies = get_cookies(p.pid, p.password)
             
-    if mod == "daily":
+    if mod == "ranking":
+        #p.types = types
         p.date = inform
         p.sdate = p.date
         p.daily_download()
