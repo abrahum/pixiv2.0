@@ -1,8 +1,8 @@
 import requests
 import re
 
-user_agent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 \
-Safari/537.36'
+user_agent = 'User-Agent,Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleW\
+ebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
 
 headers1 = ({
     'Referer': 'http://www.pixiv.net/',
@@ -49,4 +49,5 @@ def getid2(img_id, cookies):
             imgid = re.search('id=\d+', j).group()[3:]
             dataids.append(imgid)
         p += 1
+    #print(dataids)
     return dataids

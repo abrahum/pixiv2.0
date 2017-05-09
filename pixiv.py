@@ -15,8 +15,7 @@ import getopt
 import db
 import sqlite3
 
-user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' \
-             'Chrome/56.0.2924.87 Safari/537.36'
+user_agent = 'User-Agent,Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
 headers1 = ({
     'Referer': 'http://www.pixiv.net/',
     'User-Agent': user_agent
@@ -138,7 +137,7 @@ class Pixiv(object):
         self.number = 0  # 下载图片数量 0表示全部下载
         self.text = 'cookie.txt'
         self.cookies = ''  # cookie
-        self.ceiling = 4  # 防止下载到漫画，每个id图片上限
+        self.ceiling = 20  # 防止下载到漫画，每个id图片上限
         self.keyword = ''  # 高赞关键字
         self.r18 = False  # r18daily暂时无效
         self.least_likes = 500  # 高赞爬虫最少赞数
@@ -180,7 +179,7 @@ class Pixiv(object):
             mkpath = str(time.strftime('%Y-%m-%d', time.localtime(time.time())))
         else:
             mkpath = str(self.sdate[0:4]+'-'+self.sdate[4:6]+'-'+self.sdate[6:])
-        self.dataids = daily.getid(r18=self.r18, date=self.date)
+        self.dataids = daily.getid(r18=self.r18, date=self.date, cookies=self.cookies)
         saveimg.mkdir('dailyimg')  # 调用函数
         saveimg.mkdir('dailyimg'+path_break+mkpath+r18word(self.r18))
         mkpath = 'dailyimg'+path_break+mkpath+r18word(self.r18)
@@ -189,7 +188,7 @@ class Pixiv(object):
         elif self.async_able:
             saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
+            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath, ceiling=self.ceiling)
         print('Daily Done')
 
     def super_daily_download(self):
@@ -234,7 +233,7 @@ class Pixiv(object):
         elif self.async_able:
             saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
+            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath, ceiling=self.ceiling)
         print('Painter Done')
 
     def painter_bookmark_download(self):
@@ -247,7 +246,7 @@ class Pixiv(object):
         elif self.async_able:
             saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
+            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath, ceiling=self.ceiling)
         print('Painter\'s Bookmrak Done')
 
     def highlikegetid(self, startpage=0, leastpages=1000):  # 关键字爬取函数
@@ -320,25 +319,35 @@ class Pixiv(object):
         for i in dataids:
             b = 0
             dataidurl = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + str(i)
-            res1 = s.get(dataidurl)  # 相应id网站
+            #res1 = s.get(dataidurl)  # 相应id网站
+            res1 = saveimg.reget(dataidurl,s)
             content1 = res1.text
             pattern1 = re.compile('(?<= data-src=")\S*(?=" class="original-image">)')
             originaltus = re.findall(pattern1, content1)
             if not originaltus:
                 dataidurl = 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + str(i)
-                res2 = s.get(dataidurl)  # 相应id网站
+                #res2 = s.get(dataidurl)  # 相应id网站
+                res2 = saveimg.reget(dataidurl,s)
                 content2 = res2.text
                 pattern2 = re.compile('(?<=data-filter="manga-image" data-src=")\S*(?=" data-index)')
                 originaltus = re.findall(pattern2, content2)
                 if not originaltus:
-                    print(str(i) + 'not found')
+                    #print(str(i) + 'not found')
+                    print(str(i) + ' may gif')
+                    ft = open(path+'\\'+'gifid.txt','a')    #将gif图 id号输出到txt，以便自行查看
+                    ft.write(str(i)+'\n')
+                    ft.close
                     self.done += 1
                     continue
 
             for originaltu in originaltus:
                 b += 1
             if b >= self.ceiling:
-                print(str(i) + ' is too long')
+                #print(str(i) + ' is too long')
+                print(str(i)+' is too long')
+                ft = open(path+'\\'+'long picid.txt','a')    #将过长的组图id号输出到txt，以便自行查看
+                ft.write(str(i)+'\n')
+                ft.close
                 self.done += 1
                 continue
             else:
@@ -377,7 +386,7 @@ class Pixiv(object):
                         fp = open(path + path_break + string, 'wb')
                         fp.write(pic.content)
                         fp.close()  # 保存图片
-                        '''print(i+'-'+str(b) + ' download is Success')'''
+                        print(i+'-'+str(b) + ' download is Success')
                         b += 1
                     except requests.exceptions.ConnectionError:
                         print('Read timed out.')
