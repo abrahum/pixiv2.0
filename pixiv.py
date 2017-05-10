@@ -418,11 +418,11 @@ if __name__ == "__main__":
                    "BBBB      BBBBBBBBBBBBBBBBBB\n"\
                    "BBBBBBBBBBBBBBBBBBBBBBBBBBBB"\
                    "\n\npixiv.py -m <mod> -i <inform>\n         -r <r18>    enable r18(only for daily and weekly)\n" \
-                   "         -t <thread> enable threads\nmod:\nlogin    login to pixiv     -i:pid        " \
-                   "-p <password>\nranking  ranking download     -i:date  -p:type(default:daily ,weekly, monthly, rookies, original, male, " \
-                   "female)\nhighlike keyword download   -i:keyword  " \
-                   "-l <leastlike>\ndatabase database download  -i:keyword    -l <leastlike> (need builded database)" \
-                   "\npainter  painter download   -i:painterid\nbookmark bookmark download  -i:painterid"
+                   "         -t <thread> enable threads\nmod:\nlogin    login to pixiv     -i <pid>        " \
+                   "-p <password>\nranking  ranking download   -i <dat>e       -s <style> (default:daily ,weekly, monthly, rookies, original, male, " \
+                   "female)\nhighlike keyword download   -i <keyword>  " \
+                   "  -l <leastlike>\ndatabase database download  -i <keyword>    -l <leastlike> (need builded database)" \
+                   "\npainter  painter download   -i <painterid>\nbookmark bookmark download  -i <painterid>"
 
     mod = ""
     type = ""
@@ -441,7 +441,7 @@ if __name__ == "__main__":
             sys.exit()
         elif opt in ("-m", "--mod"):
             mod = arg
-        elif opt in ("-p", "--types"):
+        elif opt in ("-s", "--style"):
             p.types = arg
         elif opt in ("-i", "--inform"):
             inform = arg
