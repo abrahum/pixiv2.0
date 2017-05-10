@@ -1,11 +1,11 @@
 # pixiv2.0.1
 ```shell
 pixiv.py -m <mod> -i <inform>
-         -r <r18>     enable r18(only for daily and weekly)
+         -r <r18>    enable r18(only for daily and weekly)
          -t <thread> enable threads
 mod:
 login    login to pixiv     -i <pid>        -p <password>
-ranking  ranking download   -i <date>       -s <type>(default:daily ,weekly, monthly, rookies, original, male, female)
+ranking  ranking download   -i <date>       -s <style> (default:daily ,weekly, monthly, rookies, original, male, female)
 highlike keyword download   -i <keyword>    -l <leastlike>
 database database download  -i <keyword>    -l <leastlike> (need builded database)
 painter  painter download   -i <painterid>
