@@ -433,8 +433,8 @@ if __name__ == "__main__":
     inform = ""
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "dhrtam:i:l:p:",
-                                   ["detail","help", "r18", "thread", "async", "type=" 
+        opts, args = getopt.getopt(sys.argv[1:], "dhrtam:i:l:p:s:",
+                                   ["detail","help", "r18", "thread", "async", "style=" 
                                    "mod=", "inform=", "leastlike=", "password="])
     except getopt.GetoptError:
         print(help_message)
