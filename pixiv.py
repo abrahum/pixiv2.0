@@ -152,6 +152,7 @@ class Pixiv(object):
         self.async_able = False  # 是否允许异步（多线程优先级高于异步）
         self.runing = []  # 还在运行的线程
         self.done = 0  # 已完成的下载数量
+        self.detail = False # 是否实时显示下载日志
 
     # 几种爬取方式
  
@@ -322,20 +323,20 @@ class Pixiv(object):
             b = 0
             dataidurl = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' + str(i)
             #res1 = s.get(dataidurl)  # 相应id网站
-            res1 = saveimg.reget(dataidurl,s)
+            res1 = saveimg.reget(self,dataidurl,s)
             content1 = res1.text
             pattern1 = re.compile('(?<= data-src=")\S*(?=" class="original-image">)')
             originaltus = re.findall(pattern1, content1)
             if not originaltus:
                 dataidurl = 'http://www.pixiv.net/member_illust.php?mode=manga&illust_id=' + str(i)
                 #res2 = s.get(dataidurl)  # 相应id网站
-                res2 = saveimg.reget(dataidurl,s)
+                res2 = saveimg.reget(self,dataidurl,s)
                 content2 = res2.text
                 pattern2 = re.compile('(?<=data-filter="manga-image" data-src=")\S*(?=" data-index)')
                 originaltus = re.findall(pattern2, content2)
                 if not originaltus:
-                    #print(str(i) + 'not found')
-                    print(str(i) + ' may gif')
+                    if self.detail:
+                        print(str(i) + ' may gif')
                     ft = open(path+'\\'+'gifid.txt','a')    #将gif图 id号输出到txt，以便自行查看
                     ft.write(str(i)+'\n')
                     ft.close
@@ -345,8 +346,8 @@ class Pixiv(object):
             for originaltu in originaltus:
                 b += 1
             if b >= self.ceiling:
-                #print(str(i) + ' is too long')
-                print(str(i)+' is too long')
+                if self.detail:
+                    print(str(i)+' is too long')
                 ft = open(path+'\\'+'long picid.txt','a')    #将过长的组图id号输出到txt，以便自行查看
                 ft.write(str(i)+'\n')
                 ft.close
@@ -388,7 +389,8 @@ class Pixiv(object):
                         fp = open(path + path_break + string, 'wb')
                         fp.write(pic.content)
                         fp.close()  # 保存图片
-                        print(i+'-'+str(b) + ' download is Success')
+                        if self.detail:
+                            print(i+'-'+str(b) + ' download is Success')
                         b += 1
                     except requests.exceptions.ConnectionError:
                         print('Read timed out.')
@@ -417,9 +419,11 @@ if __name__ == "__main__":
                    "BBBBB#  BBBBBBBBBBBBBBBBBBBB\n"\
                    "BBBB      BBBBBBBBBBBBBBBBBB\n"\
                    "BBBBBBBBBBBBBBBBBBBBBBBBBBBB"\
-                   "\n\npixiv.py -m <mod> -i <inform>\n         -r <r18>    enable r18(only for daily and weekly)\n" \
-                   "         -t <thread> enable threads\nmod:\nlogin    login to pixiv     -i <pid>        " \
-                   "-p <password>\nranking  ranking download   -i <dat>e       -s <style> (default:daily ,weekly, monthly, rookies, original, male, " \
+                   "\n\npixiv.py -m <mod> -i <inform>\n         -r <r18>    enable r18 (only for daily and weekly)\n" \
+                   "         -t <thread> enable threads\n         -d <detail> enable detail message\nmod:\n"\
+                   "login    login to pixiv     -i <pid>        " \
+                   "-p <password>\nranking  ranking download   -i <date>       -s <style> "\
+                   "(default:daily ,weekly, monthly, rookies, original, male, " \
                    "female)\nhighlike keyword download   -i <keyword>  " \
                    "  -l <leastlike>\ndatabase database download  -i <keyword>    -l <leastlike> (need builded database)" \
                    "\npainter  painter download   -i <painterid>\nbookmark bookmark download  -i <painterid>"
@@ -429,16 +433,18 @@ if __name__ == "__main__":
     inform = ""
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hrtam:i:l:p:",
-                                   ["help", "r18", "thread", "async", "type=" 
+        opts, args = getopt.getopt(sys.argv[1:], "dhrtam:i:l:p:",
+                                   ["detail","help", "r18", "thread", "async", "type=" 
                                    "mod=", "inform=", "leastlike=", "password="])
     except getopt.GetoptError:
         print(help_message)
         sys.exit(2)
     for opt, arg in opts:
-        if opt == ('-h', "help"):
+        if opt in ('-h', "--help"):
             print(help_message)
             sys.exit()
+        elif opt in ('-d', "--detail"):
+            p.detail = True
         elif opt in ("-m", "--mod"):
             mod = arg
         elif opt in ("-s", "--style"):

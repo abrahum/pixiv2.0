@@ -1,8 +1,27 @@
 # pixiv2.0.1
 ```shell
+BBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBB              BBBBBB
+BBBBB    BBBBBBBBBBB    BBBB
+BBB     BBBBBBBBBBBBBB   BBB
+B   B#  BBBBBBBBBBBBBBB   BB
+B  BB#  BBBBBBBBBBBBBBB    B
+BB#BB#  BBBBBBBBBBBBBBB#   B
+BBBBB#  BBBBBBBBBBBBBBB-   B
+BBBBB#  BBBBBBBBBBBBBBB    B
+BBBBB#  BBBBBBBBBBBBBB    BB
+BBBBB#  BBBBBBBBBBBBB    BBB
+BBBBB#    BBBBBBBBB    BBBBB
+BBBBB#  BB          BBBBBBBB
+BBBBB#  BBBBBBBBBBBBBBBBBBBB
+BBBBB#  BBBBBBBBBBBBBBBBBBBB
+BBBB      BBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBB
+
 pixiv.py -m <mod> -i <inform>
-         -r <r18>    enable r18(only for daily and weekly)
+         -r <r18>    enable r18 (only for daily and weekly)
          -t <thread> enable threads
+         -d <detail> enable detail message
 mod:
 login    login to pixiv     -i <pid>        -p <password>
 ranking  ranking download   -i <date>       -s <style> (default:daily ,weekly, monthly, rookies, original, male, female)
@@ -16,6 +35,8 @@ bookmark bookmark download  -i <painterid>
 
 login模式只需要一次登录就会生成cookies，之后自动读取cookies进行爬取。
 如果爬取时，出现http报错，可以尝试重新login。
+
+脚本无法识别登陆成功与否，请在无法爬取时，确认你login的是正确的账号密码。
 
 感谢@exa160 的Pull
 

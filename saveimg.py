@@ -15,18 +15,20 @@ msg2 = ' may gif'
 filename1 = 'long picid.txt'
 filename2 = 'gifid.txt'
 
-def reget(dataidurl,s):
+def reget(p, dataidurl, s):
     try:
         res = s.get(dataidurl)  # 相应id网站
         return res
     except:
         try:
-            print('try again')
+            if p.detail:
+                print('try again')
             time.sleep(3)
             res = s.get(dataidurl)  # 相应id网站
             return res
         except:
-            print('connect error')
+            if p.detail:
+                print('connect error')
             #sys.exit()
             return 0
 
