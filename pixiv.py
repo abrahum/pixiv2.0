@@ -279,7 +279,7 @@ class Pixiv(object):
             threads.append(t)
         t = threading.Thread(target=self.save, args=(self.dataids[19*each_size:], self.cookies, mkpath))
         threads.append(t)
-        threads.append(threading.Thread(target=self.progress_bar))
+        print(str(len(self.dataids) + ' found.'))
         for t in threads:
             t.start()
         for t in threads:
@@ -294,7 +294,6 @@ class Pixiv(object):
             threads.append(t)
         for t in threads:
             t.start()
-            print(threading.active_count())
             while threading.active_count() > 20:
                 pass
         progarss_thread.join()
