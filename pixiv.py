@@ -137,7 +137,7 @@ class Pixiv(object):
         self.number = 0  # 下载图片数量 0表示全部下载
         self.text = 'cookie.txt'
         self.cookies = ''  # cookie
-        self.ceiling = 20  # 防止下载到漫画，每个id图片上限
+        self.ceiling = 4  # 防止下载到漫画，每个id图片上限
         self.keyword = ''  # 高赞关键字
         self.r18 = False  # r18daily暂时无效
         self.least_likes = 500  # 高赞爬虫最少赞数
@@ -191,10 +191,10 @@ class Pixiv(object):
         elif self.async_able:
             saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath, ceiling=self.ceiling)
+            self.save(dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('Daily Done')
 
-    def super_daily_download(self):
+    def super_daily_download(self, sdata, ldata):
         date = 20161000
         self.sdate = '201610'
         while date < 20161031:
@@ -219,11 +219,11 @@ class Pixiv(object):
         saveimg.mkdir('highlikeimg'+path_break+self.keyword+str(self.least_likes)+'like'+mkpath+r18word(self.r18))
         mkpath = 'highlikeimg'+path_break+self.keyword+str(self.least_likes) + 'like' + mkpath + r18word(self.r18)
         if self.threads:
-            self.new_threadsave(mkpath)
+            self.threadsave(mkpath)
         elif self.async_able:
             saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath)
+            self.save(dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('HighLike Done')
 
     def painter_download(self):
@@ -236,7 +236,7 @@ class Pixiv(object):
         elif self.async_able:
             saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath, ceiling=self.ceiling)
+            self.save(dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('Painter Done')
 
     def painter_bookmark_download(self):
@@ -249,7 +249,7 @@ class Pixiv(object):
         elif self.async_able:
             saveimg.async_save(self.dataids, self.cookies, mkpath)
         else:
-            saveimg.save(number=self.number, dataids=self.dataids, cookies=self.cookies, path=mkpath, ceiling=self.ceiling)
+            self.save(dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('Painter\'s Bookmrak Done')
 
     def highlikegetid(self, startpage=0, leastpages=1000):  # 关键字爬取函数
@@ -294,6 +294,7 @@ class Pixiv(object):
             threads.append(t)
         for t in threads:
             t.start()
+            print(threading.active_count())
             while threading.active_count() > 20:
                 pass
         progarss_thread.join()
@@ -342,7 +343,6 @@ class Pixiv(object):
                     ft.close
                     self.done += 1
                     continue
-
             for originaltu in originaltus:
                 b += 1
             if b >= self.ceiling:
