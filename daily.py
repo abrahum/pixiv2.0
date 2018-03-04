@@ -32,8 +32,10 @@ def getid(r18=False, date='', cookies='', types=''):
     else:
         print('types error')
         exit()
-              
-    res1 = requests.get(url1, cookies=cookies, headers=headers1)
+    try:          
+        res1 = requests.get(url1, cookies=cookies, headers=headers1)
+    except:
+        return []
 
     content2 = res1.text
     pattern2 = re.compile('(?<=data-id=")\S*(?="data-tags)')

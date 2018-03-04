@@ -122,10 +122,10 @@ def keyword_swich(keyword):
 
 def r18c(url, r18=False):
     if r18:
-        url += '&r18=1'
+        url += '&mode=r18'
         return url
     else:
-        url += '&r18=0'
+        url += '&mode=safe'
         return url    
 
 
@@ -141,7 +141,7 @@ class Pixiv(object):
         self.keyword = ''  # 高赞关键字
         self.r18 = False  # r18daily暂时无效
         self.least_likes = 500  # 高赞爬虫最少赞数
-        self.least_pages = 1000  # 高赞页数
+        self.least_pages = 10  # 高赞页数
         self.start_page = 0  # 搜索的关键字开始爬取页数
         self.id = ''  # 画手id
         self.types = 'daily'  #主页模式选择  默认 daily 1.daily 2.weekly 3.male 4.female
@@ -194,13 +194,44 @@ class Pixiv(object):
             self.save(dataids=self.dataids, cookies=self.cookies, path=mkpath)
         print('Daily Done')
 
-    def super_daily_download(self, sdata, ldata):
-        date = 20161000
-        self.sdate = '201610'
-        while date < 20161031:
-            date += 1
-            self.date = str(date)
-            self.daily_download()
+    def super_daily_download(self):
+        if self.date[4:6] in ['01','03','05','07','08','10','12']:
+            end = 31
+        elif self.date[4:6] in ['04','06','09','11']:
+            end = 30
+        elif int(self.date[:4]) % 4 == 0:
+            end = 29
+        else:
+            end = 28
+        mkpath = str(self.date[0:4]+'-'+self.date[4:6])
+        saveimg.mkdir('ranking')  # ranking
+        saveimg.mkdir('ranking'+path_break+self.types+'img')  # 调用函数
+        saveimg.mkdir('ranking'+path_break+self.types+'img'+path_break+mkpath+r18word(self.r18))
+        mkpath = 'ranking'+path_break+self.types+'img'+path_break+mkpath+r18word(self.r18)
+        date = self.date
+        if False:
+            threads = []
+            while date <= self.date[:6]+str(end):
+                t = threading.Thread(target=daily.getid,args=(self.r18,date,self.cookies,self.types))
+                threads.append(t)
+                date = str(int(date)+1)
+            for t in threads:
+                t.start()
+            for t in tqdm.tqdm(threads):
+                t.join(180)
+        else:
+            while date <= self.date[:6]+str(end):
+                dataids = daily.getid(r18=self.r18, date=date, cookies=self.cookies,types=self.types)
+                self.dataids = list(set(self.dataids).union(set(dataids)))
+                print(date+' is done.')
+                date = str(int(date)+1)
+        if self.threads:
+            self.new_threadsave(mkpath)
+        elif self.async_able:
+            saveimg.async_save(self.dataids, self.cookies, mkpath)
+        else:
+            self.save(dataids=self.dataids, cookies=self.cookies, path=mkpath)
+        print('Daily Done')
 
     def highlink_download(self):
         mkpath = str(time.strftime('%Y-%m-%d', time.localtime(time.time())))
@@ -253,10 +284,22 @@ class Pixiv(object):
         print('Painter\'s Bookmrak Done')
 
     def highlikegetid(self, startpage=0, leastpages=1000):  # 关键字爬取函数
-        base_url = r18c('http://www.pixiv.net/search.php?word=' + keyword_swich(self.keyword), self.r18)
+        s = requests.session()
+        s.cookies = requests.utils.cookiejar_from_dict(self.cookies)
+        s.headers = headers1
+        html = s.get('https://www.pixiv.net').text
+        f = open("tem0.html","w",encoding="utf-8")
+        f.write(html)
+        f.close
+        base_url = r18c('https://www.pixiv.net/search.php?word=' + keyword_swich(self.keyword), self.r18)
         for i in range(startpage, leastpages):
             myurl = base_url + '&p=' + str(i+1)
-            html = requests.get(url=myurl, cookies=self.cookies, headers=headers1).text
+            html = s.get(myurl).text
+            if i == 0:
+                print(myurl)
+                f = open("tem.html","w",encoding="utf-8")
+                f.write(html)
+                f.close
             target_list = re.findall(u'<a href="/bookmark_detail\.php\?illust_id=\d+" class="bookmark-count _ui-to'
                                      u'oltip" data-tooltip="[0-9,]+', html)
             if not target_list:
@@ -279,7 +322,6 @@ class Pixiv(object):
             threads.append(t)
         t = threading.Thread(target=self.save, args=(self.dataids[19*each_size:], self.cookies, mkpath))
         threads.append(t)
-        print(str(len(self.dataids) + ' found.'))
         for t in threads:
             t.start()
         for t in threads:
@@ -468,6 +510,10 @@ if __name__ == "__main__":
         p.date = inform
         p.sdate = p.date
         p.daily_download()
+    elif mod == "sranking":
+        p.date = inform
+        p.sdate = p.date
+        p.super_daily_download()
     elif mod == "highlike":
         p.keyword = inform
         p.highlink_download()
