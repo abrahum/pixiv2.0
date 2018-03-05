@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-  
 import sqlite3
 import time
 import asyncio
@@ -26,6 +27,7 @@ class BookmarkSpider(object):
         self.pool = []
         self.con = sqlite3.connect('pixiv.db')
         self.cur = self.con.cursor()
+        self.dbbuild()
         self.loop = asyncio.get_event_loop()
         self.s = requests.session()
         self.s.cookies = requests.utils.cookiejar_from_dict(cookies)
@@ -33,6 +35,34 @@ class BookmarkSpider(object):
                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
                                          'Chrome/50.0.2661.102 Safari/537.36'})
         self.limit = 80
+
+    def dbbuild(self):
+        self.cur.execute('''
+        CREATE TABLE IF NOT EXISTS imgs ( 
+            ID         INT             NOT NULL
+                                    PRIMARY KEY,
+            TITLE      VARCHAR( 255 )  NOT NULL,
+            LIKENUM    INT             NOT NULL,
+            PAINTERID  INT             NOT NULL,
+            UPDATETIME DATE,
+            TAG        TEXT,
+            URL        VARCHAR 
+        );
+        ''')
+        self.cur.execute('''
+        CREATE TABLE IF NOT EXISTS painters ( 
+            ID         INT             NOT NULL
+                                    PRIMARY KEY,
+            NAME       VARCHAR( 255 )  NOT NULL,
+            UPDATETIME DATE,
+            BOOKMARK   DATE,
+            ILLUST     DATE 
+        );
+        ''')
+        self.cur.execute("SELECT COUNT(0) FROM painters")
+        if self.cur.fetchall() == [(0,)]:
+            self.cur.execute('INSERT INTO painters VALUES(333556,"Bison倉鼠",'+mytime+',NULL,NULL)')
+        self.con.commit()
 
     def run(self):
         tasks = []
@@ -55,7 +85,11 @@ class BookmarkSpider(object):
             except:
                 print('ERROR')
                 continue
-            lis = re.findall('<li class="image-item"[^收]+', bookmark_html.text)
+            f = open("test.html","wb")
+            f.write(bookmark_html.content)
+            f.close()
+            lis = re.findall('<li class="image-item".{,2000}_icon _bookmark-icon-inline', bookmark_html.text)
+            print(len(lis))
             page = 2
             while lis and page < 32:
                 for i in lis:
@@ -67,16 +101,15 @@ class BookmarkSpider(object):
                 lis = re.findall('<li class="image-item" id="li_\d+"><a href="member_illust.php?[^收]+',
                                  bookmark_html.text)
                 page += 1
-                print('\r' + str(p.id), page, len(lis))
             for i in targets:
                 img = PixivImg()
                 uper = Painter()
                 try:
                     img.id = int(re.search('illust_id=\d+', i).group()[10:])
-                    img.title = re.search('title="">[^<]+', i).group()[9:]
+                    img.title = re.search('title="[^"]+', i).group()[7:]
                     uper.name = re.search('data-user_name="[^"]+', i).group()[16:]
                     uper.id = int(re.search('data-user_id="\d+', i).group()[14:])
-                    img.like_num = int(re.search('data-tooltip="[^件]+', i).group()[14:].replace(',', ''))
+                    img.like_num = int(re.search('data-tooltip="[^书]+', i).group()[14:].replace(',', ''))
                     img.tag = re.search('data-tags="[^"]+', i).group()[11:].split(' ')
                     img.painter_id = uper.id
                     img.url = re.search('data-filter="thumbnail-filter lazy-image"data-src="[^"]+', i).group()[51:]
